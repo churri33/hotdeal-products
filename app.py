@@ -344,9 +344,10 @@ def make_styled_table(frame, highlight_column):
         st.info("표시할 데이터가 없습니다.")
         return
 
-    # 요청 비율: 운영주차 0.5, 홈쇼핑사 0.5, 상품명 1.3,
-    # 나머지 3개 열은 각 1.0 (총 5.3 기준)
-    widths = [9.43, 9.43, 24.53, 18.87, 18.87, 18.87]
+    # 요청 비율: 운영주차 0.5, 홈쇼핑사 0.5는 유지,
+    # 상품명은 기존 대비 1.5배(1.3 -> 1.95),
+    # 나머지 3개 열은 남은 너비를 동일하게 배분 (총 5.3 기준)
+    widths = [9.43, 9.43, 36.79, 14.78, 14.78, 14.78]
     col_styles = "".join(
         f'<col style="width:{width}%;min-width:0">'
         for width in widths[:len(frame.columns)]
