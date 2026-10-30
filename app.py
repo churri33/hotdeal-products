@@ -9,59 +9,67 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# 사이드바 커스텀 CSS (TV 이모지 제거, 커다란 전체 영역 클릭 블록 버튼, 컬럼 감지 강화)
+# 어드민 사이트 메뉴바 완벽 재현 CSS
 st.markdown(
     """
     <style>
-    /* 사이드바 배경 */
+    /* 사이드바 전체 패딩 제거 및 어드민 딥블루 배경 */
     [data-testid="stSidebar"] {
-        background-color: #1e2530 !important;
+        background-color: #2b3245 !important;
+        padding-top: 0rem !important;
     }
-    [data-testid="stSidebar"] * {
-        color: #e0e6ed;
+    [data-testid="stSidebar"] > div:first-child {
+        padding-top: 1rem !important;
     }
     
-    /* 사이드바 메인 타이틀 (TV 이모지 제거, 꽉 차게) */
-    .sidebar-title {
-        font-size: 26px !important;
-        font-weight: 800 !important;
-        color: #ffffff !important;
-        margin-top: -10px;
-        margin-bottom: 25px;
-        line-height: 1.2;
+    /* 상단 타이틀 스타일 */
+    .sidebar-header {
+        padding: 20px 16px 15px 16px;
+        font-size: 24px;
+        font-weight: 800;
+        color: #ffffff;
+        border-bottom: 1px solid #1f2533;
         letter-spacing: -0.5px;
     }
 
-    /* 꽉 차는 커다란 네모 블록 메뉴 버튼 스타일 */
+    /* 구분선 + 꽉 찬 영역 어드민 블록 버튼 */
     div.stButton > button {
         width: 100% !important;
-        height: 60px !important;               /* 높이 대폭 확대 */
-        background-color: #2a3444 !important;
+        height: 54px !important;
+        background-color: #2b3245 !important;
         color: #ffffff !important;
-        border: 1px solid #3a475a !important;
-        border-radius: 8px !important;
+        border: none !important;
+        border-bottom: 1px solid #202636 !important;
+        border-top: 1px solid #384158 !important;
+        border-radius: 0px !important;
         text-align: left !important;
         padding-left: 20px !important;
         font-weight: 700 !important;
-        font-size: 18px !important;             /* 폰트 크기 확대 */
-        margin-bottom: 12px !important;
+        font-size: 16px !important;
+        margin: 0px !important;
         display: flex !important;
         align-items: center !important;
-        transition: all 0.2s ease-in-out !important;
+        justify-content: space-between !important;
+        transition: background-color 0.2s ease !important;
     }
     
-    /* 메뉴 마우스 호버 효과 */
+    /* 호버 시 어드민 블루 반전 */
     div.stButton > button:hover {
-        background-color: #2563eb !important;
+        background-color: #1f2533 !important;
         color: #ffffff !important;
-        border-color: #2563eb !important;
         cursor: pointer;
     }
-    
-    /* 하단 DATA SOURCE 텍스트 스타일 */
+
+    /* 하단 DATA SOURCE 스타일 */
+    .data-source-container {
+        padding: 20px 16px;
+        background-color: #232938;
+        border-top: 1px solid #1f2533;
+        margin-top: 40px;
+    }
     .data-source-text {
         color: #8a99ad !important;
-        font-size: 14px;
+        font-size: 13px;
         line-height: 1.6;
     }
     .data-source-text a {
@@ -79,14 +87,14 @@ SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6evDMSAeNeklE
 GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1UqzVBDl3sTgKSZYty61BKqbvgrmTAIO0M4FaAulpwUo/edit?gid=686867409#gid=686867409"
 
 
-# 2. 데이터 정제 및 로드 함수 (실제 구글 시트 컬럼명 반영)
+# 2. 데이터 로드 및 정제
 @st.cache_data(ttl=300)
 def load_data():
     try:
         df = pd.read_csv(SHEET_CSV_URL)
         df.columns = df.columns.astype(str).str.strip()
 
-        # 실제 시트 컬럼명 '총 판매금액' -> '총매출액' 표준화, '총 판매건수' -> '판매건수' 표준화
+        # 실제 시트 컬럼명 매핑
         column_mapping = {
             "총 판매금액": "총매출액",
             "총 판매건수": "판매건수",
@@ -95,7 +103,6 @@ def load_data():
         }
         df = df.rename(columns=column_mapping)
 
-        # 숫자 정제 대상
         target_num_cols = ["총매출액", "판매건수", "할인가", "정가", "할인율"]
         for col in target_num_cols:
             if col in df.columns:
@@ -104,7 +111,6 @@ def load_data():
                 )
                 df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
-        # 객단가 계산
         if "총매출액" in df.columns and "판매건수" in df.columns:
             df["객단가"] = (
                 (df["총매출액"] / df["판매건수"])
@@ -121,41 +127,39 @@ def load_data():
 
 df = load_data()
 
-# 세션 상태 초기화
+# 세션 상태 초기화 (메뉴 상태 유지)
 if "menu" not in st.session_state:
-    st.session_state.menu = "1. 종합 실적"
+    st.session_state.menu = "종합 실적"
 
 # ==========================================
-# 사이드바
+# 사이드바 (어드민 리얼 네비게이션)
 # ==========================================
 
-# 1. 메인 타이틀 (TV 이모지 제외)
+# 1. 최상단 타이틀
 st.sidebar.markdown(
-    '<div class="sidebar-title">B tv 핫딜 대시보드</div>',
+    '<div class="sidebar-header">B tv 핫딜 대시보드</div>',
     unsafe_allow_html=True,
 )
 
-# 2. 아이콘 없는 커다란 네모 블록 메뉴 버튼
-if st.sidebar.button("1. 종합 실적"):
-    st.session_state.menu = "1. 종합 실적"
+# 2. 숫자를 제외한 어드민 메뉴 항목
+if st.sidebar.button("종합 실적"):
+    st.session_state.menu = "종합 실적"
 
-if st.sidebar.button("2. 상품 검색"):
-    st.session_state.menu = "2. 상품 검색"
+if st.sidebar.button("상품 검색 / 비교"):
+    st.session_state.menu = "상품 검색 / 비교"
 
-if st.sidebar.button("3. 홈쇼핑사별 분석"):
-    st.session_state.menu = "3. 홈쇼핑사별 분석"
-
-# 여백
-st.sidebar.markdown("<br><br><br><br>", unsafe_allow_html=True)
+if st.sidebar.button("홈쇼핑사별 분석"):
+    st.session_state.menu = "홈쇼핑사별 분석"
 
 # 3. 하단 DATA SOURCE
-st.sidebar.markdown("---")
 st.sidebar.markdown(
     f"""
-    <div class="data-source-text">
-        <strong>DATA SOURCE</strong><br>
-        🔗 <a href="{GOOGLE_SHEET_URL}" target="_blank">RAW 구글시트 바로가기</a><br><br>
-        최종 집계일: 26.10.26(월)
+    <div class="data-source-container">
+        <div class="data-source-text">
+            <strong>DATA SOURCE</strong><br>
+            🔗 <a href="{GOOGLE_SHEET_URL}" target="_blank">RAW 구글시트 바로가기</a><br><br>
+            최종 집계일: 26.10.26(월)
+        </div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -165,10 +169,10 @@ selected_menu = st.session_state.menu
 
 
 # ==========================================
-# [메뉴 1] 1. 종합 실적
+# [메뉴 1] 종합 실적
 # ==========================================
-if selected_menu == "1. 종합 실적":
-    st.title("📊 1. 종합 실적")
+if selected_menu == "종합 실적":
+    st.title("📊 종합 실적")
     st.caption("B tv 핫딜 전체 입점 상품의 주요 실적과 랭킹을 한눈에 확인합니다.")
 
     if df.empty:
@@ -228,11 +232,11 @@ if selected_menu == "1. 종합 실적":
 
 
 # ==========================================
-# [메뉴 2] 2. 상품 검색
+# [메뉴 2] 상품 검색 / 비교
 # ==========================================
-elif selected_menu == "2. 상품 검색":
-    st.title("🔍 2. 상품 검색")
-    st.caption("키워드, 가격대, 할인율, 카테고리 등 조건별로 상품을 밀착 검색합니다.")
+elif selected_menu == "상품 검색 / 비교":
+    st.title("🔍 상품 검색 / 비교")
+    st.caption("키워드, 가격대, 할인율, 카테고리 등 조건별로 상품을 밀착 검색하고 비교합니다.")
 
     if df.empty:
         st.warning("데이터를 불러오지 못했습니다.")
@@ -293,10 +297,10 @@ elif selected_menu == "2. 상품 검색":
 
 
 # ==========================================
-# [메뉴 3] 3. 홈쇼핑사별 분석
+# [메뉴 3] 홈쇼핑사별 분석
 # ==========================================
-elif selected_menu == "3. 홈쇼핑사별 분석":
-    st.title("🏢 3. 홈쇼핑사별 분석")
+elif selected_menu == "홈쇼핑사별 분석":
+    st.title("🏢 홈쇼핑사별 분석")
     st.caption("제휴 홈쇼핑사별 입점 성과, 히스토리 및 효자 상품을 분석합니다.")
 
     if df.empty or "홈쇼핑사" not in df.columns:
