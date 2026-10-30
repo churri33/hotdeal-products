@@ -614,8 +614,8 @@ if st.session_state.menu == "종합 실적":
                     "홈쇼핑사": sales_top["홈쇼핑사"],
                     "상품명": sales_top["상품명"],
                     "총 매출": sales_top["총매출액"].map(format_won),
-                    "할인가": sales_top["할인가"].map(format_won),
                     "판매건수": sales_top["판매건수"].map(format_count),
+                    "할인가": sales_top["할인가"].map(format_won),
                 })
                 make_styled_table(sales_table, "총 매출")
 
@@ -631,8 +631,8 @@ if st.session_state.menu == "종합 실적":
                     "홈쇼핑사": count_top["홈쇼핑사"],
                     "상품명": count_top["상품명"],
                     "판매건수": count_top["판매건수"].map(format_count),
-                    "할인가": count_top["할인가"].map(format_won),
                     "총매출": count_top["총매출액"].map(format_won),
+                    "할인가": count_top["할인가"].map(format_won),
                 })
                 make_styled_table(count_table, "판매건수")
             else:
