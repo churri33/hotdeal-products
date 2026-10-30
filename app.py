@@ -328,6 +328,14 @@ def make_styled_table(frame, highlight_column):
                     ("table-layout", "fixed"),
                 ],
             },
+            # 열 너비 비율: 운영주차 0.5, 홈쇼핑사 0.5, 상품명 1.3,
+            # 나머지 3개 열은 동일한 너비
+            {"selector": "col:nth-child(1)", "props": [("width", "9.43% ")]},
+            {"selector": "col:nth-child(2)", "props": [("width", "9.43% ")]},
+            {"selector": "col:nth-child(3)", "props": [("width", "24.53% ")]},
+            {"selector": "col:nth-child(4)", "props": [("width", "18.87% ")]},
+            {"selector": "col:nth-child(5)", "props": [("width", "18.87% ")]},
+            {"selector": "col:nth-child(6)", "props": [("width", "18.87% ")]},
         ]
     )
 
@@ -452,19 +460,17 @@ if st.session_state.menu == "종합 실적":
                 ].nunique()
                 if "상품명" in filtered_df.columns else len(filtered_df)
             )
-            latest_week = (
-                max(filtered_df["주차"].dropna().tolist(), key=week_number)
-                if not filtered_df.empty else "-"
-            )
+            # 총 운영 주차는 선택한 주차 범위의 양 끝을 포함해 계산
+            total_operating_weeks = end_idx - start_idx + 1 if start_idx <= end_idx else 0
 
             st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
             k1, k2, k3, k4 = st.columns(4)
             with k1:
                 st.markdown(
                     f"""<div class="kpi-card">
-                    <div class="kpi-label">운영 주차</div>
-                    <div class="kpi-value">{latest_week}</div>
-                    <div class="kpi-sub">선택 기간 내 최신 실적 주차</div>
+                    <div class="kpi-label">총 운영 주차</div>
+                    <div class="kpi-value">{total_operating_weeks}주</div>
+                    <div class="kpi-sub">선택한 조회 기간</div>
                     </div>""",
                     unsafe_allow_html=True,
                 )
@@ -559,7 +565,7 @@ if st.session_state.menu == "종합 실적":
                 st.info("선택한 기간에 표시할 매출 데이터가 없습니다.")
 
             st.markdown("---")
-            st.subheader("상품 랭킹")
+            st.subheader("🏆 상품 랭킹")
 
             # 공통 랭킹 데이터 준비
             ranking_df = filtered_df.copy()
@@ -568,8 +574,8 @@ if st.session_state.menu == "종합 실적":
                     if col not in ranking_df.columns:
                         ranking_df[col] = "" if col in ["주차", "홈쇼핑사", "상품명"] else 0
 
-                # 매출액 TOP 10
-                st.markdown('<div class="ranking-heading"><span class="ranking-accent-sales">매출액</span> TOP 50</div>', unsafe_allow_html=True)
+                # 매출액 TOP 50
+                st.markdown('<div class="ranking-heading">① <span class="ranking-accent-sales">매출액</span> TOP 50</div>', unsafe_allow_html=True)
                 sales_top = ranking_df.sort_values(
                     "총매출액", ascending=False
                 ).head(50).copy()
@@ -585,8 +591,8 @@ if st.session_state.menu == "종합 실적":
 
                 st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
-                # 판매량 TOP 10
-                st.markdown('<div class="ranking-heading"><span class="ranking-accent-count">판매량</span> TOP 50</div>', unsafe_allow_html=True)
+                # 판매건수 TOP 50
+                st.markdown('<div class="ranking-heading">② <span class="ranking-accent-count">판매건수</span> TOP 50</div>', unsafe_allow_html=True)
                 count_top = ranking_df.sort_values(
                     "판매건수", ascending=False
                 ).head(50).copy()
