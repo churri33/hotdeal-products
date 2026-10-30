@@ -9,70 +9,73 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# 커스텀 CSS (메뉴 상단 완전 고정, 폰트 2배 BOLD, 트렌디 컬러, 최하단 DATA SOURCE)
+# 사이드바 패딩 제거 및 꽉 차는 레이아웃 CSS
 st.markdown(
     """
     <style>
-    /* 사이드바 배경 및 최하단 고정을 위한 뷰포트 설정 */
+    /* 사이드바 기본 패딩 제거 */
     section[data-testid="stSidebar"] {
-        background-color: #0f172a !important; /* 트렌디 다크 슬레이트 */
+        background-color: #1a202c !important;
     }
     section[data-testid="stSidebar"] > div:first-child {
-        display: flex !important;
-        flex-direction: column !important;
-        height: 100vh !important;
         padding: 0px !important;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
     }
-
-    /* 사이드바 메인 타이틀 */
+    
+    /* 타이틀 영역 */
     .sidebar-header {
         padding: 24px 20px 20px 20px;
         font-size: 26px !important;
         font-weight: 900 !important;
         color: #ffffff !important;
-        border-bottom: 2px solid #334155 !important;
-        letter-spacing: -0.8px;
+        border-bottom: 2px solid #323d4d;
+        letter-spacing: -0.5px;
     }
 
-    /* 상단 메뉴를 담는 영역 */
-    .menu-box {
-        flex: 1;
+    /* 가로 100% 전체 영역 꽉 차는 버튼 커스텀 */
+    div[data-testid="stSidebarNav"] {
+        display: none;
     }
-
-    /* 커다란 BOLD 어드민 메뉴 버튼 (가로 꽉 차게) */
-    div.stButton > button {
+    
+    [data-testid="stSidebar"] .stButton {
         width: 100% !important;
-        height: 72px !important;
-        background-color: #0f172a !important;
-        color: #ffffff !important;
+        margin: 0 !important;
+    }
+
+    [data-testid="stSidebar"] .stButton > button {
+        width: 100% !important;
+        height: 65px !important;
+        background-color: #1a202c !important;
+        color: #e2e8f0 !important;
         border: none !important;
-        border-bottom: 2px solid #334155 !important; /* 또렷한 구분선 */
+        border-bottom: 2px solid #323d4d !important;
         border-radius: 0px !important;
         text-align: left !important;
-        padding-left: 24px !important;
-        font-weight: 900 !important;           /* 폰트 극강 BOLD */
-        font-size: 26px !important;             /* 폰트 크기 2배 확대 */
-        letter-spacing: -0.5px !important;
+        padding-left: 20px !important;
+        font-weight: 800 !important;
+        font-size: 20px !important;
         margin: 0px !important;
         display: flex !important;
         align-items: center !important;
-        transition: all 0.2s ease-in-out !important;
+        box-sizing: border-box !important;
     }
-    
-    /* 마우스 호버 시 트렌디 인디고 반전 컬러 */
-    div.stButton > button:hover {
-        background-color: #4f46e5 !important;
+
+    /* 마우스 호버 시 트렌디 딥 퍼플 포인트 반전 및 꽉 채우기 */
+    [data-testid="stSidebar"] .stButton > button:hover {
+        background-color: #6366f1 !important;
         color: #ffffff !important;
         border-bottom-color: #6366f1 !important;
         cursor: pointer;
     }
 
-    /* 최하단 영구 고정 DATA SOURCE */
+    /* 최하단 DATA SOURCE 영역 */
     .data-source-container {
-        padding: 24px 20px;
-        background-color: #020617;
-        border-top: 2px solid #334155;
-        margin-top: auto !important;           /* 맨 밑 고정 */
+        padding: 20px;
+        background-color: #0f172a;
+        border-top: 2px solid #323d4d;
+        margin-top: auto !important;
     }
     .data-source-text {
         color: #8a99ad !important;
@@ -101,7 +104,6 @@ def load_data():
         df = pd.read_csv(SHEET_CSV_URL)
         df.columns = df.columns.astype(str).str.strip()
 
-        # 실제 시트 컬럼명 매핑
         column_mapping = {
             "총 판매금액": "총매출액",
             "총 판매건수": "판매건수",
@@ -148,14 +150,14 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 
-# 2. 상단 메뉴 박스
-if st.sidebar.button("종합 실적"):
+# 2. 가로 100% 채우는 메뉴 버튼
+if st.sidebar.button("종합 실적", key="btn1"):
     st.session_state.menu = "종합 실적"
 
-if st.sidebar.button("상품 검색 / 비교"):
+if st.sidebar.button("상품 검색 / 비교", key="btn2"):
     st.session_state.menu = "상품 검색 / 비교"
 
-if st.sidebar.button("홈쇼핑사별 분석"):
+if st.sidebar.button("홈쇼핑사별 분석", key="btn3"):
     st.session_state.menu = "홈쇼핑사별 분석"
 
 # 3. 최하단 고정 DATA SOURCE
@@ -242,111 +244,4 @@ if selected_menu == "종합 실적":
 # [메뉴 2] 상품 검색 / 비교
 # ==========================================
 elif selected_menu == "상품 검색 / 비교":
-    st.title("🔍 상품 검색 / 비교")
-    st.caption("키워드, 가격대, 할인율, 카테고리 등 조건별로 상품을 밀착 검색하고 비교합니다.")
-
-    if df.empty:
-        st.warning("데이터를 불러오지 못했습니다.")
-    else:
-        col_filter1, col_filter2, col_filter3 = st.columns(3)
-
-        with col_filter1:
-            search_kw = st.text_input("🔎 상품명 키워드 검색", "", placeholder="예: 갈비, 코트, 에어프라이어")
-            cats = (
-                ["전체"] + list(df["카테고리"].dropna().unique())
-                if "카테고리" in df.columns
-                else ["전체"]
-            )
-            selected_cat = st.selectbox("📂 카테고리 선택", cats)
-
-        with col_filter2:
-            chans = (
-                ["전체"] + list(df["홈쇼핑사"].dropna().unique())
-                if "홈쇼핑사" in df.columns
-                else ["전체"]
-            )
-            selected_chan = st.selectbox("📺 홈쇼핑사 선택", chans)
-            min_discount = st.slider("🏷️ 최소 할인율 (%)", 0, 50, 0, step=5)
-
-        with col_filter3:
-            max_price_limit = (
-                int(df["할인가"].max())
-                if ("할인가" in df.columns and df["할인가"].max() > 0)
-                else 1000000
-            )
-            price_range = st.slider("💵 할인가 범위 (원)", 0, max_price_limit, (0, max_price_limit), step=5000)
-
-        search_df = df.copy()
-        if search_kw and "상품명" in search_df.columns:
-            search_df = search_df[search_df["상품명"].str.contains(search_kw, case=False, na=False)]
-        if selected_cat != "전체" and "카테고리" in search_df.columns:
-            search_df = search_df[search_df["카테고리"] == selected_cat]
-        if selected_chan != "전체" and "홈쇼핑사" in search_df.columns:
-            search_df = search_df[search_df["홈쇼핑사"] == selected_chan]
-        if "할인율" in search_df.columns:
-            search_df = search_df[search_df["할인율"] >= min_discount]
-        if "할인가" in search_df.columns:
-            search_df = search_df[
-                (search_df["할인가"] >= price_range[0]) & (search_df["할인가"] <= price_range[1])
-            ]
-
-        st.markdown("---")
-        res_col1, res_col2, res_col3 = st.columns(3)
-        res_col1.metric("검색된 상품 수", f"{len(search_df):,} 건")
-
-        s_sales = search_df["총매출액"].sum() if "총매출액" in search_df else 0
-        res_col2.metric("검색 상품 총 매출액", f"{int(s_sales):,} 원")
-
-        avg_p = int(search_df["할인가"].mean()) if len(search_df) > 0 else 0
-        res_col3.metric("검색 상품 평균 할인가", f"{avg_p:,} 원")
-
-        st.dataframe(search_df, use_container_width=True)
-
-
-# ==========================================
-# [메뉴 3] 홈쇼핑사별 분석
-# ==========================================
-elif selected_menu == "홈쇼핑사별 분석":
-    st.title("🏢 홈쇼핑사별 분석")
-    st.caption("제휴 홈쇼핑사별 입점 성과, 히스토리 및 효자 상품을 분석합니다.")
-
-    if df.empty or "홈쇼핑사" not in df.columns:
-        st.warning("홈쇼핑사 데이터가 없습니다.")
-    else:
-        partners = list(df["홈쇼핑사"].dropna().unique())
-        selected_partner = st.selectbox("🏢 분석할 홈쇼핑사를 선택하세요", partners)
-
-        partner_df = df[df["홈쇼핑사"] == selected_partner]
-
-        col_p1, col_p2, col_p3 = st.columns(3)
-        col_p1.metric("누적 진행 상품 수", f"{len(partner_df):,} 건")
-
-        p_sales = partner_df["총매출액"].sum() if "총매출액" in partner_df else 0
-        col_p2.metric("누적 총 매출액", f"{int(p_sales):,} 원")
-
-        top_cat = (
-            partner_df["카테고리"].mode()[0]
-            if ("카테고리" in partner_df and not partner_df.empty)
-            else "-"
-        )
-        col_p3.metric("주력 카테고리", top_cat)
-
-        st.markdown("---")
-
-        left_p, right_p = st.columns([1, 1])
-
-        with left_p:
-            st.subheader(f"🏆 {selected_partner} 역대 효자 상품 Top 5")
-            if "총매출액" in partner_df.columns:
-                partner_top5 = partner_df.sort_values(by="총매출액", ascending=False).head(5)
-                st.dataframe(partner_top5, use_container_width=True)
-
-        with right_p:
-            st.subheader(f"📊 {selected_partner} 주차별 매출 흐름")
-            if "주차" in partner_df.columns and "총매출액" in partner_df.columns:
-                partner_trend = partner_df.groupby("주차", as_index=False)["총매출액"].sum()
-                st.line_chart(data=partner_trend, x="주차", y="총매출액", use_container_width=True)
-
-        st.markdown("---")
-        st.subheader(f"📋 {selected_partner} 전체 딜 진행 히스토리")
-        st.dataframe(partner_df, use_container_width=True)
+    st.title
