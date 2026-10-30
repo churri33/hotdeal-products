@@ -9,11 +9,11 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# [테마 1] 클래식 딥 차콜 & 에머랄드 어드민 CSS
+# [클래식 차콜 & 에머랄드 어드민 테마]
 st.markdown(
     """
     <style>
-    /* 1. 사이드바 메인 차콜 배경 */
+    /* 사이드바 배경 및 기본 색상 */
     section[data-testid="stSidebar"] {
         background-color: #1E2430 !important;
     }
@@ -24,9 +24,9 @@ st.markdown(
         height: 100vh;
     }
 
-    /* 2. 상단 타이틀 영역 */
-    .sidebar-header {
-        padding: 24px 20px 20px 20px;
+    /* 상단 대시보드 타이틀 */
+    .sidebar-title {
+        padding: 24px 20px;
         font-size: 26px !important;
         font-weight: 900 !important;
         color: #ffffff !important;
@@ -34,59 +34,39 @@ st.markdown(
         letter-spacing: -0.5px;
     }
 
-    /* 3. 라디오 버튼 개조 - 가로 100% 꽉 차는 메인 메뉴 */
-    div[data-testid="stRadio"] > label {
-        display: none !important;
-    }
-    div[data-testid="stRadio"] > div {
-        gap: 0px !important;
-    }
-    div[data-testid="stRadio"] label[data-baseweb="radio"] {
+    /* 템플릿 방식: 꽉 차는 네비게이션 블록 버튼 */
+    div[data-testid="stSidebar"] div.stButton > button {
         width: 100% !important;
-        margin: 0px !important;
-        padding: 0px !important;
-    }
-    div[data-testid="stRadio"] label[data-baseweb="radio"] > div:first-child {
-        display: none !important; /* 동그라미 제거 */
-    }
-
-    /* 메뉴 항목 디자인 (큰 폰트 + 2배 BOLD + 선명한 구분선) */
-    div[data-testid="stRadio"] label[data-baseweb="radio"] > div:last-child {
-        width: 100% !important;
-        height: 70px !important;
+        height: 64px !important;
         background-color: #1E2430 !important;
         color: #E2E8F0 !important;
-        border-bottom: 2px solid #272E3D !important; /* 명확한 구분선 */
-        font-size: 22px !important;
-        font-weight: 900 !important;               /* 강렬한 BOLD */
+        border: none !important;
+        border-bottom: 2px solid #272E3D !important;
+        border-radius: 0px !important;
+        text-align: left !important;
         padding-left: 24px !important;
+        font-size: 22px !important;
+        font-weight: 900 !important;
         display: flex !important;
         align-items: center !important;
         box-sizing: border-box !important;
         transition: all 0.2s ease-in-out !important;
     }
 
-    /* 마우스 호버(Hover) 시 에머랄드 그린 포인트 반전 */
-    div[data-testid="stRadio"] label[data-baseweb="radio"]:hover > div:last-child {
-        background-color: #10B981 !important;     /* 에머랄드 그린 */
+    /* 마우스 호버 시 에머랄드 반전 포인트 */
+    div[data-testid="stSidebar"] div.stButton > button:hover {
+        background-color: #10B981 !important;
         color: #ffffff !important;
         border-bottom-color: #059669 !important;
         cursor: pointer;
     }
 
-    /* 현재 선택된 메뉴 유지 상태 */
-    div[data-testid="stRadio"] input:checked + div {
-        background-color: #059669 !important;     /* 딥 에머랄드 */
-        color: #ffffff !important;
-        border-bottom-color: #047857 !important;
-    }
-
-    /* 4. 최하단 고정 DATA SOURCE */
+    /* 최하단 영구 고정 DATA SOURCE 영역 */
     .data-source-container {
-        padding: 24px 20px;
-        background-color: #171C26;              /* 더 깊은 차콜 하단 */
+        padding: 20px;
+        background-color: #171C26;
         border-top: 2px solid #272E3D;
-        margin-top: auto !important;           /* 최하단 강제 이동 */
+        margin-top: auto !important; /* 맨 밑으로 고정 */
     }
     .data-source-text {
         color: #8A99AD !important;
@@ -94,7 +74,7 @@ st.markdown(
         line-height: 1.6;
     }
     .data-source-text a {
-        color: #10B981 !important;              /* 에머랄드 링크 포인트 */
+        color: #10B981 !important;
         text-decoration: underline;
         font-weight: 600;
     }
@@ -147,24 +127,31 @@ def load_data():
 
 df = load_data()
 
+# 세션 상태 초기화 (메뉴 상태 유지)
+if "menu" not in st.session_state:
+    st.session_state.menu = "종합 실적"
+
 # ==========================================
-# 사이드바
+# 사이드바 (템플릿 모듈형 네비게이션)
 # ==========================================
 
 # 1. 상단 타이틀
 st.sidebar.markdown(
-    '<div class="sidebar-header">B tv 핫딜 대시보드</div>',
+    '<div class="sidebar-title">B tv 핫딜 대시보드</div>',
     unsafe_allow_html=True,
 )
 
-# 2. 가로 100% 차오르는 커스텀 메뉴
-selected_menu = st.sidebar.radio(
-    "메뉴 선택",
-    ["종합 실적", "상품 검색 / 비교", "홈쇼핑사별 분석"],
-    label_visibility="collapsed",
-)
+# 2. 가로 전체 클릭 메뉴 블록
+if st.sidebar.button("종합 실적", use_container_width=True):
+    st.session_state.menu = "종합 실적"
 
-# 3. 최하단 고정 DATA SOURCE
+if st.sidebar.button("상품 검색 / 비교", use_container_width=True):
+    st.session_state.menu = "상품 검색 / 비교"
+
+if st.sidebar.button("홈쇼핑사별 분석", use_container_width=True):
+    st.session_state.menu = "홈쇼핑사별 분석"
+
+# 3. 최하단 영구 고정 DATA SOURCE
 st.sidebar.markdown(
     f"""
     <div class="data-source-container">
@@ -177,6 +164,8 @@ st.sidebar.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+selected_menu = st.session_state.menu
 
 
 # ==========================================
