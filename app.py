@@ -57,18 +57,18 @@ st.markdown(
         display: none !important;
     }
 
-    /* 로고 크기: 기존 대비 약 70% */
-    section[data-testid="stSidebar"] [data-testid="stImage"] {
-        width: 70% !important;
-        max-width: 180px !important;
-        margin: 18px auto 22px 14px !important;
-        padding-bottom: 14px;
+    /* 사이드바 텍스트형 타이틀 */
+    .sidebar-title {
+        color: var(--purple);
+        font-size: 23px;
+        font-weight: 750;
+        letter-spacing: -0.8px;
+        line-height: 1.3;
+        text-align: left;
+        padding: 22px 14px 20px 14px;
+        margin-bottom: 12px;
         border-bottom: 1px solid var(--sidebar-line);
-    }
-    section[data-testid="stSidebar"] [data-testid="stImage"] img {
-        width: 100% !important;
-        height: auto !important;
-        object-fit: contain !important;
+        white-space: nowrap;
     }
 
     /* 메뉴: 아이콘 없이 크게, 굵게, 왼쪽 정렬 */
@@ -88,8 +88,8 @@ st.markdown(
         justify-content: flex-start !important;
         padding: 0 16px !important;
         font-size: 19px !important;
-        font-weight: 800 !important;
-        letter-spacing: -0.5px !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.35px !important;
         box-shadow: none !important;
         white-space: nowrap !important;
     }
@@ -104,7 +104,12 @@ st.markdown(
         margin: 0 !important;
         text-align: left !important;
         font-size: 19px !important;
-        font-weight: 800 !important;
+        font-weight: 600 !important;
+    }
+    section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
+        background: var(--purple-soft) !important;
+        color: var(--purple) !important;
+        font-weight: 650 !important;
     }
     section[data-testid="stSidebar"] div.stButton > button:hover {
         background: var(--purple-soft) !important;
@@ -355,16 +360,21 @@ def safe_column(frame, column, default=""):
 if "menu" not in st.session_state:
     st.session_state.menu = "종합 실적"
 
-# 로고 PNG는 app.py와 같은 GitHub 저장소 경로에 함께 업로드
-logo_path = Path(__file__).parent / "btv_hotdeal_logo.png"
-if logo_path.exists():
-    st.sidebar.image(str(logo_path), use_container_width=True)
-else:
-    st.sidebar.warning("로고 파일 btv_hotdeal_logo.png를 저장소에 추가해 주세요.")
+# 로고 이미지 대신 텍스트 타이틀 사용
+st.sidebar.markdown(
+    '<div class="sidebar-title">B tv 핫딜 대시보드</div>',
+    unsafe_allow_html=True,
+)
 
 menu_items = ["종합 실적", "상품 검색 / 비교", "홈쇼핑사별 분석"]
 for label in menu_items:
-    if st.sidebar.button(label, key=f"nav_{label}", use_container_width=True):
+    is_active = st.session_state.menu == label
+    if st.sidebar.button(
+        label,
+        key=f"nav_{label}",
+        use_container_width=True,
+        type="primary" if is_active else "secondary",
+    ):
         st.session_state.menu = label
 
 st.sidebar.markdown(
