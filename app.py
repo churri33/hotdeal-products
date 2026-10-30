@@ -32,52 +32,79 @@ st.markdown(
         --body-text: #253449;
     }
 
-    /* 밝은 로고에 맞춰 사이드바 전체를 화이트 톤으로 변경 */
+    /* 사이드바: 80% 폭으로 고정, 접기 버튼 숨김 */
     section[data-testid="stSidebar"] {
         background: var(--sidebar-bg) !important;
-        min-width: 300px !important;
-        max-width: 300px !important;
+        width: 240px !important;
+        min-width: 240px !important;
+        max-width: 240px !important;
+        flex-shrink: 0 !important;
+        transform: none !important;
+        visibility: visible !important;
     }
     section[data-testid="stSidebar"] > div,
     section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
         background: var(--sidebar-bg) !important;
     }
     section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        gap: 0.55rem;
+        gap: 0.45rem;
     }
 
-    .sidebar-logo-wrap {
-        padding: 20px 12px 25px 12px;
-        margin-bottom: 14px;
+    /* 사이드바 접기/펼치기 컨트롤 제거 */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="collapsedControl"],
+    button[kind="header"] {
+        display: none !important;
+    }
+
+    /* 로고 크기: 기존 대비 약 70% */
+    section[data-testid="stSidebar"] [data-testid="stImage"] {
+        width: 70% !important;
+        max-width: 180px !important;
+        margin: 18px auto 22px 14px !important;
+        padding-bottom: 14px;
         border-bottom: 1px solid var(--sidebar-line);
     }
-    .sidebar-logo-wrap img {
-        display: block;
-        width: 100%;
-        max-width: 258px;
-        height: auto;
+    section[data-testid="stSidebar"] [data-testid="stImage"] img {
+        width: 100% !important;
+        height: auto !important;
+        object-fit: contain !important;
     }
 
-    /* 메뉴: 아이콘 제거, 2배 크기, 볼드, 왼쪽 정렬 */
+    /* 메뉴: 아이콘 없이 크게, 굵게, 왼쪽 정렬 */
     section[data-testid="stSidebar"] div.stButton {
-        width: 100%;
+        width: 100% !important;
         margin: 0 !important;
     }
     section[data-testid="stSidebar"] div.stButton > button {
+        display: flex !important;
         width: 100% !important;
-        min-height: 62px !important;
+        min-height: 54px !important;
         border: 0 !important;
-        border-radius: 5px !important;
+        border-radius: 6px !important;
         background: transparent !important;
         color: var(--sidebar-text) !important;
         text-align: left !important;
         justify-content: flex-start !important;
-        padding: 0 18px !important;
-        font-size: 28px !important;
+        padding: 0 16px !important;
+        font-size: 19px !important;
         font-weight: 800 !important;
-        letter-spacing: -1px !important;
+        letter-spacing: -0.5px !important;
         box-shadow: none !important;
         white-space: nowrap !important;
+    }
+    section[data-testid="stSidebar"] div.stButton > button > div {
+        display: flex !important;
+        width: 100% !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+    section[data-testid="stSidebar"] div.stButton > button p {
+        width: 100% !important;
+        margin: 0 !important;
+        text-align: left !important;
+        font-size: 19px !important;
+        font-weight: 800 !important;
     }
     section[data-testid="stSidebar"] div.stButton > button:hover {
         background: var(--purple-soft) !important;
@@ -88,26 +115,26 @@ st.markdown(
         box-shadow: none !important;
     }
 
-    /* 하단 DATA SOURCE 고정 */
+    /* 하단 DATA SOURCE */
     .data-source-fixed {
         position: fixed;
         bottom: 0;
         left: 0;
-        width: 300px;
+        width: 240px;
         box-sizing: border-box;
-        padding: 20px 22px 24px 22px;
+        padding: 18px 16px 20px 16px;
         background: #F7F8FB;
         border-top: 1px solid var(--sidebar-line);
         z-index: 999;
         color: var(--sidebar-muted);
-        font-size: 18px;
+        font-size: 15px;
         line-height: 1.65;
     }
     .data-source-fixed strong {
         color: #26364A;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 850;
-        letter-spacing: 0.8px;
+        letter-spacing: 0.6px;
     }
     .data-source-fixed a {
         color: var(--purple) !important;
@@ -331,9 +358,7 @@ if "menu" not in st.session_state:
 # 로고 PNG는 app.py와 같은 GitHub 저장소 경로에 함께 업로드
 logo_path = Path(__file__).parent / "btv_hotdeal_logo.png"
 if logo_path.exists():
-    st.sidebar.markdown('<div class="sidebar-logo-wrap">', unsafe_allow_html=True)
     st.sidebar.image(str(logo_path), use_container_width=True)
-    st.sidebar.markdown('</div>', unsafe_allow_html=True)
 else:
     st.sidebar.warning("로고 파일 btv_hotdeal_logo.png를 저장소에 추가해 주세요.")
 
