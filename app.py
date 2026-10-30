@@ -1,4 +1,5 @@
 import re
+import html
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -106,10 +107,25 @@ st.markdown(
         font-size: 19px !important;
         font-weight: 600 !important;
     }
+    /* 선택된 메뉴: Streamlit primary 버튼을 기준으로 강제 스타일 */
+    section[data-testid="stSidebar"] div[data-testid="stButton"] > button[data-testid="stBaseButton-primary"],
     section[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
-        background: var(--purple-soft) !important;
-        color: var(--purple) !important;
-        font-weight: 650 !important;
+        background: #EEEAFE !important;
+        background-color: #EEEAFE !important;
+        color: #3518C9 !important;
+        border: 1px solid #DDD5FF !important;
+        font-weight: 700 !important;
+        opacity: 1 !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stButton"] > button[data-testid="stBaseButton-primary"] *,
+    section[data-testid="stSidebar"] div.stButton > button[kind="primary"] * {
+        color: #3518C9 !important;
+        fill: #3518C9 !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stButton"] > button[data-testid="stBaseButton-secondary"] {
+        background: transparent !important;
+        color: #253449 !important;
+        border: 1px solid transparent !important;
     }
     section[data-testid="stSidebar"] div.stButton > button:hover {
         background: var(--purple-soft) !important;
@@ -204,6 +220,48 @@ st.markdown(
     .ranking-accent-count {
         color: #0A9470;
     }
+
+    /* TOP 50 표: 실제 HTML 테이블로 열 너비와 내부 스크롤 고정 */
+    .ranking-table-wrap {
+        width: 100%;
+        max-height: 430px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        border: 1px solid #E5E9EF;
+        border-radius: 7px;
+        background: #FFFFFF;
+    }
+    table.ranking-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .ranking-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #E7E9EE;
+        color: #3D4858;
+        font-weight: 800;
+        text-align: center;
+        padding: 10px 7px;
+        border-bottom: 1px solid #D4D9E1;
+        white-space: nowrap;
+    }
+    .ranking-table tbody td {
+        color: #253449;
+        text-align: center;
+        vertical-align: middle;
+        padding: 8px 7px;
+        border-bottom: 1px solid #E8EDF1;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: keep-all;
+    }
+    .ranking-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -281,81 +339,48 @@ def format_man(value):
     return f"{value / 10000:,.1f}만건"
 
 def make_styled_table(frame, highlight_column):
-    """TOP50 데이터를 약 10행 높이의 스크롤 표로 표시."""
+    """TOP50 데이터를 열 너비 비율이 고정된 내부 스크롤 표로 표시."""
     if frame.empty:
         st.info("표시할 데이터가 없습니다.")
         return
 
-    styler = frame.style
-    styler = styler.set_properties(
-        subset=[highlight_column],
-        **{
-            "background-color": "#EEEAFE" if highlight_column in ["총 매출", "총매출"] else "#E2F5EF",
-            "color": "#3518C9" if highlight_column in ["총 매출", "총매출"] else "#087A52",
-            "font-weight": "800",
-        },
+    # 요청 비율: 운영주차 0.5, 홈쇼핑사 0.5, 상품명 1.3,
+    # 나머지 3개 열은 각 1.0 (총 5.3 기준)
+    widths = [9.43, 9.43, 24.53, 18.87, 18.87, 18.87]
+    col_styles = "".join(
+        f'<col style="width:{width}%;min-width:0">'
+        for width in widths[:len(frame.columns)]
     )
-    styler = styler.set_table_styles(
-        [
-            {
-                "selector": "th",
-                "props": [
-                    ("background-color", "#E7E9EE"),
-                    ("color", "#3D4858"),
-                    ("font-weight", "800"),
-                    ("text-align", "center"),
-                    ("padding", "10px 7px"),
-                    ("border-bottom", "1px solid #D4D9E1"),
-                    ("white-space", "nowrap"),
-                ],
-            },
-            {
-                "selector": "td",
-                "props": [
-                    ("text-align", "center"),
-                    ("padding", "8px 7px"),
-                    ("border-bottom", "1px solid #E8EDF1"),
-                    ("font-size", "13px"),
-                    ("white-space", "normal"),
-                    ("word-break", "keep-all"),
-                ],
-            },
-            {
-                "selector": "table",
-                "props": [
-                    ("width", "100%"),
-                    ("border-collapse", "collapse"),
-                    ("table-layout", "fixed"),
-                ],
-            },
-            # 열 너비 비율: 운영주차 0.5, 홈쇼핑사 0.5, 상품명 1.3,
-            # 나머지 3개 열은 동일한 너비
-            {"selector": "col:nth-child(1)", "props": [("width", "9.43% ")]},
-            {"selector": "col:nth-child(2)", "props": [("width", "9.43% ")]},
-            {"selector": "col:nth-child(3)", "props": [("width", "24.53% ")]},
-            {"selector": "col:nth-child(4)", "props": [("width", "18.87% ")]},
-            {"selector": "col:nth-child(5)", "props": [("width", "18.87% ")]},
-            {"selector": "col:nth-child(6)", "props": [("width", "18.87% ")]},
-        ]
+    headers = "".join(
+        f'<th style="width:{widths[i]}%;max-width:{widths[i]}%">'
+        f'{html.escape(str(col))}</th>'
+        for i, col in enumerate(frame.columns)
     )
 
-    # index는 숨기고, 높이를 약 10행으로 제한해 나머지는 표 내부 스크롤
-    column_config = {
-        "운영 주차": st.column_config.TextColumn("운영 주차", width="small"),
-        "홈쇼핑사": st.column_config.TextColumn("홈쇼핑사", width="small"),
-        "상품명": st.column_config.TextColumn("상품명", width="medium"),
-        "총 매출": st.column_config.TextColumn("총 매출", width="medium"),
-        "총매출": st.column_config.TextColumn("총매출", width="medium"),
-        "판매건수": st.column_config.TextColumn("판매건수", width="small"),
-        "할인가": st.column_config.TextColumn("할인가", width="small"),
-    }
-    st.dataframe(
-        styler,
-        use_container_width=True,
-        hide_index=True,
-        height=430,
-        column_config=column_config,
+    rows = []
+    for _, row in frame.iterrows():
+        cells = []
+        for i, col in enumerate(frame.columns):
+            value = html.escape(str(row[col]))
+            width_style = f"width:{widths[i]}%;max-width:{widths[i]}%;"
+            if col == highlight_column:
+                color = "#3518C9" if highlight_column in ["총 매출", "총매출"] else "#087A52"
+                bg = "#EEEAFE" if highlight_column in ["총 매출", "총매출"] else "#E2F5EF"
+                cells.append(
+                    f'<td style="{width_style}background:{bg};color:{color};font-weight:800">{value}</td>'
+                )
+            else:
+                cells.append(f'<td style="{width_style}">{value}</td>')
+        rows.append("<tr>" + "".join(cells) + "</tr>")
+
+    table_html = (
+        '<div class="ranking-table-wrap"><table class="ranking-table" '
+        'style="width:100%;min-width:100%;table-layout:fixed">'
+        f"<colgroup>{col_styles}</colgroup>"
+        f"<thead><tr>{headers}</tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table></div>"
     )
+    st.markdown(table_html, unsafe_allow_html=True)
 
 def safe_column(frame, column, default=""):
     if column in frame.columns:
@@ -374,16 +399,20 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 
+def set_active_menu(label):
+    st.session_state.menu = label
+
 menu_items = ["종합 실적", "상품 검색 / 비교", "홈쇼핑사별 분석"]
 for label in menu_items:
     is_active = st.session_state.menu == label
-    if st.sidebar.button(
+    st.sidebar.button(
         label,
         key=f"nav_{label}",
         use_container_width=True,
         type="primary" if is_active else "secondary",
-    ):
-        st.session_state.menu = label
+        on_click=set_active_menu,
+        args=(label,),
+    )
 
 st.sidebar.markdown(
     f"""
