@@ -9,66 +9,73 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# 사이드바 커스텀 CSS (메뉴 폰트 확대, 선명한 구분선, 호버 효과, 최하단 고정)
+# 커스텀 CSS (메뉴 상단 배치, 폰트 2배+BOLD, 시원한 꽉 찬 가로 클릭, 트렌디 컬러, DATA SOURCE 최하단)
 st.markdown(
     """
     <style>
-    /* 사이드바 전체 레이아웃 (플렉스박스로 하단 영역 고정) */
+    /* 사이드바 전체 배경 및 최하단 고정을 위한 flex 설정 */
     [data-testid="stSidebar"] {
-        background-color: #1e293b !important;
+        background-color: #0f172a !important; /* 트렌디 다크 슬레이트 */
         padding-top: 0rem !important;
     }
     [data-testid="stSidebar"] > div:first-child {
         display: flex;
         flex-direction: column;
         height: 100vh;
-        justify-content: space-between;
         padding-top: 1rem !important;
+        padding-left: 0rem !important;
+        padding-right: 0rem !important;
     }
     
-    /* 상단 타이틀 */
+    /* 사이드바 상단 타이틀 */
     .sidebar-header {
         padding: 24px 20px 20px 20px;
-        font-size: 26px !important;
-        font-weight: 800 !important;
+        font-size: 28px !important;
+        font-weight: 900 !important;
         color: #ffffff !important;
         border-bottom: 2px solid #334155 !important;
-        letter-spacing: -0.5px;
+        letter-spacing: -0.8px;
     }
 
-    /* 선명한 구분선과 커다란 텍스트의 어드민 메뉴 버튼 */
+    /* 상단 메뉴 영역 컨테이너 */
+    .menu-container {
+        flex: 1; /* 상단 영역 차지 */
+    }
+
+    /* 폰트 2배, BOLD, 꽉 찬 가로 영역 어드민 블록 버튼 */
     div.stButton > button {
         width: 100% !important;
-        height: 64px !important;               /* 버튼 높이 확대 */
-        background-color: #1e293b !important;
-        color: #f1f5f9 !important;             /* 가독성 높은 밝은 글자 */
+        height: 72px !important;               /* 버튼 높이 시원하게 확대 */
+        background-color: #0f172a !important;  /* 기본 바탕 */
+        color: #f8fafc !important;             /* 아주 선명한 선홍빛 백색 */
         border: none !important;
-        border-bottom: 2px solid #334155 !important; /* 명확하고 잘 보이는 구분선 */
+        border-bottom: 2px solid #334155 !important; /* 확실한 선명 구분선 */
         border-radius: 0px !important;
         text-align: left !important;
         padding-left: 24px !important;
-        font-weight: 700 !important;
-        font-size: 19px !important;             /* 폰트 크기 크게 확대 */
+        font-weight: 900 !important;           /* 강렬한 BOLD */
+        font-size: 23px !important;             /* 폰트 크기 2배 확대 */
+        letter-spacing: -0.5px !important;
         margin: 0px !important;
         display: flex !important;
         align-items: center !important;
         transition: all 0.2s ease-in-out !important;
     }
     
-    /* 마우스 호버(Hover) 시 세련된 블루 하이라이트 반전 효과 */
+    /* 마우스 호버(Hover) 시 트렌디 딥 인디고/퍼플 포인트 반전 효과 */
     div.stButton > button:hover {
-        background-color: #2563eb !important;   /* 선명한 파란색 호버 */
+        background-color: #4f46e5 !important;   /* 트렌디 인디고 퍼플 */
         color: #ffffff !important;
-        border-bottom-color: #2563eb !important;
+        border-bottom-color: #6366f1 !important;
         cursor: pointer;
     }
 
-    /* 하단 DATA SOURCE (맨 밑으로 붙도록 설정) */
+    /* 최하단 DATA SOURCE 영역 */
     .data-source-container {
         padding: 24px 20px;
-        background-color: #0f172a;
+        background-color: #020617;              /* 더 짙은 하단 베이스 */
         border-top: 2px solid #334155;
-        margin-top: auto !important;           /* 최하단 강제 이동 */
+        margin-top: auto !important;           /* 맨 아래로 강제 이동 */
     }
     .data-source-text {
         color: #8a99ad !important;
@@ -76,7 +83,7 @@ st.markdown(
         line-height: 1.6;
     }
     .data-source-text a {
-        color: #38bdf8 !important;
+        color: #818cf8 !important;              /* 트렌디 인디고 링크 컬러 */
         text-decoration: underline;
         font-weight: 600;
     }
@@ -135,7 +142,7 @@ if "menu" not in st.session_state:
     st.session_state.menu = "종합 실적"
 
 # ==========================================
-# 사이드바
+# 사이드바 (상단 메뉴 + 최하단 DATA SOURCE)
 # ==========================================
 
 # 1. 최상단 타이틀
@@ -144,7 +151,7 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 
-# 2. 선명한 구분선의 큰 어드민 메뉴 항목
+# 2. 상단 고정 큰 폰트 BOLD 메뉴 항목
 if st.sidebar.button("종합 실적"):
     st.session_state.menu = "종합 실적"
 
