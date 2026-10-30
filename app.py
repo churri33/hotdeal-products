@@ -3,45 +3,71 @@ import streamlit as st
 
 # 1. 페이지 기본 설정
 st.set_page_config(
-    page_title="B tv 핫딜 어드민 대시보드",
+    page_title="B tv 핫딜 대시보드",
     page_icon="📺",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# 어드민 사이드바 스타일 커스텀 CSS
+# 사이드바 커스텀 CSS (가로 전체 영역 클릭 및 하단 고정 레이아웃)
 st.markdown(
     """
     <style>
-    /* 사이드바 전체 배경 톤 어둡게 (어드민 느낌) */
+    /* 사이드바 배경 및 기본 폰트 색상 설정 */
     [data-testid="stSidebar"] {
         background-color: #1e2530 !important;
     }
     [data-testid="stSidebar"] * {
-        color: #e0e6ed !important;
+        color: #e0e6ed;
     }
     
-    /* 사이드바 버튼 블록 스타일 */
+    /* 사이드바 메인 타이틀 크기 및 여백 조정 */
+    .sidebar-title {
+        font-size: 28px !important;
+        font-weight: 800 !important;
+        color: #ffffff !important;
+        margin-top: -10px;
+        margin-bottom: 25px;
+        line-height: 1.2;
+        letter-spacing: -0.5px;
+    }
+
+    /* 가로 전체 영역 클릭 가능한 메뉴 버튼 스타일 */
     div.stButton > button {
-        width: 100%;
-        height: 48px;
-        background-color: #2a3444;
-        color: #a0aec0 !important;
-        border: 1px solid #3a475a;
-        border-radius: 6px;
-        text-align: left;
-        padding-left: 16px;
-        font-weight: 600;
-        font-size: 15px;
-        margin-bottom: 6px;
-        transition: all 0.2s ease;
+        width: 100% !important;
+        height: 52px !important;
+        background-color: #2a3444 !important;
+        color: #cbd5e1 !important;
+        border: 1px solid #3a475a !important;
+        border-radius: 8px !important;
+        text-align: left !important;
+        padding-left: 18px !important;
+        font-weight: 700 !important;
+        font-size: 16px !important;
+        margin-bottom: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        transition: all 0.2s ease-in-out !important;
     }
     
-    /* 버튼 호버 및 활성화 상태 */
+    /* 메뉴 마우스 호버 및 클릭 전체 영역 효과 */
     div.stButton > button:hover {
         background-color: #3b82f6 !important;
         color: #ffffff !important;
         border-color: #3b82f6 !important;
+        cursor: pointer;
+    }
+    
+    /* 하단 DATA SOURCE 영역 텍스트 색상 통일 */
+    .data-source-text {
+        color: #8a99ad !important;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    .data-source-text a {
+        color: #8a99ad !important;
+        text-decoration: underline;
+        font-weight: 600;
     }
     </style>
 """,
@@ -84,59 +110,54 @@ def load_data():
 
 df = load_data()
 
-# 세션 상태 초기화 (메뉴 상태 유지)
+# 세션 상태 초기화 (기본 선택 메뉴)
 if "menu" not in st.session_state:
-    st.session_state.menu = "🏆 역대 랭킹 & 실적"
+    st.session_state.menu = "1. 종합 실적"
 
 # ==========================================
-# 사이드바 (어드민 블록 메뉴)
+# 사이드바 (메뉴 및 하단 DATA SOURCE)
 # ==========================================
+
+# 1. 메인 타이틀 (폰트 크기 150% 꽉 차게)
 st.sidebar.markdown(
-    "<h2 style='color:#ffffff; margin-bottom: 20px;'>📺 B tv 핫딜 어드민</h2>",
+    '<div class="sidebar-title">📺 B tv 핫딜 대시보드</div>',
     unsafe_allow_html=True,
 )
+
+# 2. 가로 전체 영역 클릭 메뉴 버튼
+if st.sidebar.button("📊  1. 종합 실적"):
+    st.session_state.menu = "1. 종합 실적"
+
+if st.sidebar.button("🔍  2. 상품 검색"):
+    st.session_state.menu = "2. 상품 검색"
+
+if st.sidebar.button("🏢  3. 홈쇼핑사별 분석"):
+    st.session_state.menu = "3. 홈쇼핑사별 분석"
+
+# 하단으로 밀어주기 위한 여백 구획
+st.sidebar.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
+
+# 3. 하단 DATA SOURCE (색상 통일 및 최하단 배치)
+st.sidebar.markdown("---")
 st.sidebar.markdown(
-    "<p style='color:#8a99ad; font-size: 13px; font-weight: bold;'>MAIN MENU</p>",
+    f"""
+    <div class="data-source-text">
+        <strong>DATA SOURCE</strong><br>
+        🔗 <a href="{GOOGLE_SHEET_URL}" target="_blank">RAW 구글시트 바로가기</a><br><br>
+        최종 집계일: 26.10.26(월)
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
-# 1. 어드민 블록 메뉴 버튼들
-if st.sidebar.button("🏆  역대 랭킹 & 실적 종합"):
-    st.session_state.menu = "🏆 역대 랭킹 & 실적"
-
-if st.sidebar.button("🔍  통합 상품 상세 검색"):
-    st.session_state.menu = "🔍 통합 상품 검색"
-
-if st.sidebar.button("🏢  홈쇼핑사별 파트너 분석"):
-    st.session_state.menu = "🏢 홈쇼핑사별 분석"
-
-st.sidebar.markdown("<br><hr style='border-color: #3a475a;'><br>", unsafe_allow_html=True)
-
-# 2. 하단 RAW 데이터 관리 영역
-st.sidebar.markdown(
-    "<p style='color:#8a99ad; font-size: 13px; font-weight: bold;'>DATA SOURCE</p>",
-    unsafe_allow_html=True,
-)
-st.sidebar.markdown(f"🔗 **[RAW 구글시트 바로가기]({GOOGLE_SHEET_URL})**")
-
-latest_week = "-"
-if not df.empty and "주차" in df.columns:
-    latest_week = (
-        df["주차"].dropna().iloc[0] if len(df["주차"].dropna()) > 0 else "-"
-    )
-
-st.sidebar.caption(f"📅 총 **{len(df):,}개** 실적 연동 ({latest_week} 기준)")
-
-
-# 선택된 메뉴 가져오기
 selected_menu = st.session_state.menu
 
 
 # ==========================================
-# [메뉴 1] 역대 랭킹 & 실적 종합
+# [메뉴 1] 종합 실적
 # ==========================================
-if selected_menu == "🏆 역대 랭킹 & 실적":
-    st.title("🏆 역대 랭킹 & 실적 종합")
+if selected_menu == "1. 종합 실적":
+    st.title("📊 1. 종합 실적")
     st.caption("B tv 핫딜 전체 입점 상품의 주요 실적과 랭킹을 한눈에 확인합니다.")
 
     if df.empty:
@@ -153,7 +174,6 @@ if selected_menu == "🏆 역대 랭킹 & 실적":
         if selected_week != "전체 주차" and "주차" in filtered_df.columns:
             filtered_df = filtered_df[filtered_df["주차"] == selected_week]
 
-        # KPI 카드
         col1, col2, col3, col4 = st.columns(4)
         total_sales = filtered_df["총매출액"].sum() if "총매출액" in filtered_df else 0
         total_count = filtered_df["판매건수"].sum() if "판매건수" in filtered_df else 0
@@ -167,13 +187,11 @@ if selected_menu == "🏆 역대 랭킹 & 실적":
 
         st.markdown("---")
 
-        # 주차별 매출 추이
         st.subheader("📈 주차별 매출 추이")
         if "주차" in df.columns and "총매출액" in df.columns:
             week_summary = df.groupby("주차", as_index=False)["총매출액"].sum()
             st.bar_chart(data=week_summary, x="주차", y="총매출액", use_container_width=True)
 
-        # Top 10 탭
         st.subheader("🥇 Top 실적 상품")
         tab1, tab2 = st.tabs(["💰 매출액 Top 10", "📦 판매량 Top 10"])
 
@@ -199,10 +217,10 @@ if selected_menu == "🏆 역대 랭킹 & 실적":
 
 
 # ==========================================
-# [메뉴 2] 통합 상품 검색
+# [메뉴 2] 상품 검색
 # ==========================================
-elif selected_menu == "🔍 통합 상품 검색":
-    st.title("🔍 통합 상품 상세 검색 & 필터")
+elif selected_menu == "2. 상품 검색":
+    st.title("🔍 2. 상품 검색")
     st.caption("키워드, 가격대, 할인율, 카테고리 등 조건별로 상품을 밀착 검색합니다.")
 
     if df.empty:
@@ -236,7 +254,6 @@ elif selected_menu == "🔍 통합 상품 검색":
             )
             price_range = st.slider("💵 할인가 범위 (원)", 0, max_price_limit, (0, max_price_limit), step=5000)
 
-        # 필터링
         search_df = df.copy()
         if search_kw and "상품명" in search_df.columns:
             search_df = search_df[search_df["상품명"].str.contains(search_kw, case=False, na=False)]
@@ -251,7 +268,6 @@ elif selected_menu == "🔍 통합 상품 검색":
                 (search_df["할인가"] >= price_range[0]) & (search_df["할인가"] <= price_range[1])
             ]
 
-        # 결과 요약
         st.markdown("---")
         res_col1, res_col2, res_col3 = st.columns(3)
         res_col1.metric("검색된 상품 수", f"{len(search_df):,} 건")
@@ -268,8 +284,8 @@ elif selected_menu == "🔍 통합 상품 검색":
 # ==========================================
 # [메뉴 3] 홈쇼핑사별 분석
 # ==========================================
-elif selected_menu == "🏢 홈쇼핑사별 분석":
-    st.title("🏢 홈쇼핑사별 파트너십 분석")
+elif selected_menu == "3. 홈쇼핑사별 분석":
+    st.title("🏢 3. 홈쇼핑사별 분석")
     st.caption("제휴 홈쇼핑사별 입점 성과, 히스토리 및 효자 상품을 분석합니다.")
 
     if df.empty or "홈쇼핑사" not in df.columns:
