@@ -1,5 +1,4 @@
 import re
-from pathlib import Path
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -206,15 +205,6 @@ def load_data():
         data.columns = data.columns.astype(str).str.strip()
         data = data.rename(columns=COLUMN_MAPPING)
 
-        # CSV에 함께 들어온 불필요한 엑셀 인덱스/첫 번째 빈 열 제거
-        unnamed_cols = [
-            col for col in data.columns
-            if str(col).strip().lower().startswith("unnamed")
-            or str(col).strip() in ("", "index", "인덱스")
-        ]
-        if unnamed_cols:
-            data = data.drop(columns=unnamed_cols)
-
         # 숫자형 컬럼 정리
         for col in ["총매출액", "판매건수", "할인가", "정가", "할인율"]:
             if col in data.columns:
@@ -236,6 +226,7 @@ def load_data():
         return pd.DataFrame()
 
 df = load_data()
+
 # =========================================================
 # 4. 공통 함수
 # =========================================================
@@ -244,22 +235,17 @@ def week_number(value):
     match = re.search(r"\d+", str(value))
     return int(match.group()) if match else -1
 
-
 def format_won(value):
     return f"{int(round(value)):,}원"
-
 
 def format_count(value):
     return f"{int(round(value)):,}건"
 
-
 def format_eok(value, digits=2):
     return f"{value / 100000000:,.{digits}f}억"
 
-
 def format_man(value):
     return f"{value / 10000:,.1f}만건"
-
 
 def make_styled_table(frame, highlight_column):
     """TOP50 데이터를 약 10행 높이의 스크롤 표로 표시."""
@@ -276,7 +262,6 @@ def make_styled_table(frame, highlight_column):
             "font-weight": "800",
         },
     )
-
     styler = styler.set_table_styles(
         [
             {
@@ -313,7 +298,7 @@ def make_styled_table(frame, highlight_column):
         ]
     )
 
-    # 인덱스 숨김 + 약 10행 높이로 제한
+    # index는 숨기고, 높이를 약 10행으로 제한해 나머지는 표 내부 스크롤
     column_config = {
         "운영 주차": st.column_config.TextColumn("운영 주차", width="small"),
         "홈쇼핑사": st.column_config.TextColumn("홈쇼핑사", width="small"),
@@ -323,7 +308,6 @@ def make_styled_table(frame, highlight_column):
         "판매건수": st.column_config.TextColumn("판매건수", width="small"),
         "할인가": st.column_config.TextColumn("할인가", width="small"),
     }
-
     st.dataframe(
         styler,
         use_container_width=True,
@@ -332,12 +316,10 @@ def make_styled_table(frame, highlight_column):
         column_config=column_config,
     )
 
-
 def safe_column(frame, column, default=""):
     if column in frame.columns:
         return frame[column]
     return pd.Series([default] * len(frame), index=frame.index)
-
 
 # =========================================================
 # 5. 사이드바
@@ -347,40 +329,17 @@ if "menu" not in st.session_state:
 
 # 로고 PNG는 app.py와 같은 GitHub 저장소 경로에 함께 업로드
 logo_path = Path(__file__).parent / "btv_hotdeal_logo.png"
-
 if logo_path.exists():
-    st.sidebar.markdown(
-        '<div class="sidebar-logo-wrap">',
-        unsafe_allow_html=True,
-    )
-    st.sidebar.image(
-        str(logo_path),
-        use_container_width=True,
-    )
-    st.sidebar.markdown(
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    st.sidebar.markdown('<div class="sidebar-logo-wrap">', unsafe_allow_html=True)
+    st.sidebar.image(str(logo_path), use_container_width=True)
+    st.sidebar.markdown('</div>', unsafe_allow_html=True)
 else:
-    st.sidebar.warning(
-        "로고 파일 btv_hotdeal_logo.png를 저장소에 추가해 주세요."
-    )
+    st.sidebar.warning("로고 파일 btv_hotdeal_logo.png를 저장소에 추가해 주세요.")
 
-
-menu_items = [
-    "종합 실적",
-    "상품 검색 / 비교",
-    "홈쇼핑사별 분석",
-]
-
+menu_items = ["종합 실적", "상품 검색 / 비교", "홈쇼핑사별 분석"]
 for label in menu_items:
-    if st.sidebar.button(
-        label,
-        key=f"nav_{label}",
-        use_container_width=True,
-    ):
+    if st.sidebar.button(label, key=f"nav_{label}", use_container_width=True):
         st.session_state.menu = label
-
 
 st.sidebar.markdown(
     f"""
@@ -393,13 +352,11 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 
-
 # =========================================================
 # 6. 메뉴 1 - 종합 실적
 # =========================================================
 if st.session_state.menu == "종합 실적":
     st.title("📊 종합 실적")
-
     st.markdown(
         '<div class="section-caption">B tv 핫딜 전체 입점 상품의 주요 실적과 랭킹을 한눈에 확인합니다.</div>',
         unsafe_allow_html=True,
@@ -407,26 +364,19 @@ if st.session_state.menu == "종합 실적":
 
     if df.empty:
         st.warning("데이터를 불러오지 못했습니다. 구글 시트를 확인해 주세요.")
-
     elif "주차" not in df.columns:
         st.error("구글 시트에 '주차' 컬럼이 없습니다.")
-
     else:
         # 주차 목록 정렬
-        week_values = [
-            w for w in df["주차"].dropna().unique().tolist()
-            if str(w).strip()
-        ]
+        week_values = [w for w in df["주차"].dropna().unique().tolist() if str(w).strip()]
         week_values = sorted(week_values, key=week_number)
 
         if not week_values:
             st.warning("선택할 수 있는 주차 데이터가 없습니다.")
-
         else:
-            # 시작/끝 주차 필터
-            # 오른쪽 두 칸은 공백으로 유지
+            # 시작/끝 주차 필터는 KPI 카드의 첫 번째/두 번째 너비에 맞추고
+            # 오른쪽 두 칸은 비워 둠
             filter_cols = st.columns([1, 1, 1, 1])
-
             with filter_cols[0]:
                 start_week = st.selectbox(
                     "시작 주차",
@@ -434,7 +384,6 @@ if st.session_state.menu == "종합 실적":
                     index=0,
                     key="start_week",
                 )
-
             with filter_cols[1]:
                 end_week = st.selectbox(
                     "끝 주차",
@@ -445,15 +394,11 @@ if st.session_state.menu == "종합 실적":
 
             start_idx = week_values.index(start_week)
             end_idx = week_values.index(end_week)
-
             if start_idx > end_idx:
-                st.warning(
-                    "시작 주차가 끝 주차보다 늦습니다. 기간을 다시 선택해 주세요."
-                )
+                st.warning("시작 주차가 끝 주차보다 늦습니다. 기간을 다시 선택해 주세요.")
                 filtered_df = df.iloc[0:0].copy()
-
             else:
-                selected_weeks = week_values[start_idx:end_idx + 1]
+                selected_weeks = week_values[start_idx : end_idx + 1]
                 filtered_df = df[df["주차"].isin(selected_weeks)].copy()
 
             # KPI 계산
@@ -461,95 +406,68 @@ if st.session_state.menu == "종합 실적":
                 filtered_df["총매출액"].sum()
                 if "총매출액" in filtered_df.columns else 0
             )
-
             total_count = (
                 filtered_df["판매건수"].sum()
                 if "판매건수" in filtered_df.columns else 0
             )
-
             product_count = (
                 filtered_df.loc[
-                    filtered_df["상품명"].astype(str).str.strip() != "",
-                    "상품명",
+                    filtered_df["상품명"].astype(str).str.strip() != "", "상품명"
                 ].nunique()
                 if "상품명" in filtered_df.columns else len(filtered_df)
             )
-
             latest_week = (
-                max(
-                    filtered_df["주차"].dropna().tolist(),
-                    key=week_number,
-                )
+                max(filtered_df["주차"].dropna().tolist(), key=week_number)
                 if not filtered_df.empty else "-"
             )
-                        st.markdown(
-                "<div style='height:12px'></div>",
-                unsafe_allow_html=True,
-            )
 
+            st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
             k1, k2, k3, k4 = st.columns(4)
-
             with k1:
                 st.markdown(
-                    f"""
-                    <div class="kpi-card">
-                        <div class="kpi-label">운영 주차</div>
-                        <div class="kpi-value">{latest_week}</div>
-                        <div class="kpi-sub">선택 기간 내 최신 실적 주차</div>
-                    </div>
-                    """,
+                    f"""<div class="kpi-card">
+                    <div class="kpi-label">운영 주차</div>
+                    <div class="kpi-value">{latest_week}</div>
+                    <div class="kpi-sub">선택 기간 내 최신 실적 주차</div>
+                    </div>""",
                     unsafe_allow_html=True,
                 )
-
             with k2:
                 st.markdown(
-                    f"""
-                    <div class="kpi-card">
-                        <div class="kpi-label">총 매출</div>
-                        <div class="kpi-value">{format_eok(total_sales, 2)}</div>
-                        <div class="kpi-sub">{format_won(total_sales)}</div>
-                    </div>
-                    """,
+                    f"""<div class="kpi-card">
+                    <div class="kpi-label">총 매출</div>
+                    <div class="kpi-value">{format_eok(total_sales, 2)}</div>
+                    <div class="kpi-sub">{format_won(total_sales)}</div>
+                    </div>""",
                     unsafe_allow_html=True,
                 )
-
             with k3:
                 st.markdown(
-                    f"""
-                    <div class="kpi-card">
-                        <div class="kpi-label">총 판매 건수</div>
-                        <div class="kpi-value">{format_man(total_count)}</div>
-                        <div class="kpi-sub">{format_count(total_count)}</div>
-                    </div>
-                    """,
+                    f"""<div class="kpi-card">
+                    <div class="kpi-label">총 판매 건수</div>
+                    <div class="kpi-value">{format_man(total_count)}</div>
+                    <div class="kpi-sub">{format_count(total_count)}</div>
+                    </div>""",
                     unsafe_allow_html=True,
                 )
-
             with k4:
                 st.markdown(
-                    f"""
-                    <div class="kpi-card">
-                        <div class="kpi-label">판매 상품 종류</div>
-                        <div class="kpi-value">{product_count:,}종</div>
-                        <div class="kpi-sub">선택 기간 내 상품명 기준</div>
-                    </div>
-                    """,
+                    f"""<div class="kpi-card">
+                    <div class="kpi-label">판매 상품 종류</div>
+                    <div class="kpi-value">{product_count:,}종</div>
+                    <div class="kpi-sub">선택 기간 내 상품명 기준</div>
+                    </div>""",
                     unsafe_allow_html=True,
                 )
 
-            # -------------------------------------------------
-            # 주차별 매출 추이
-            # -------------------------------------------------
             st.markdown("---")
             st.subheader("📈 주차별 매출 추이")
 
             if not filtered_df.empty and "총매출액" in filtered_df.columns:
-
                 trend = (
                     filtered_df.groupby("주차", as_index=False)["총매출액"]
                     .sum()
                 )
-
                 trend["_sort"] = trend["주차"].map(week_number)
                 trend = trend.sort_values("_sort")
                 trend["매출(억)"] = trend["총매출액"] / 100000000
@@ -561,17 +479,11 @@ if st.session_state.menu == "종합 실적":
                     markers=True,
                     custom_data=["주차", "매출(억)"],
                 )
-
                 fig.update_traces(
                     line=dict(color="#10B981", width=3),
                     marker=dict(size=8, color="#10B981"),
-                    hovertemplate=(
-                        "%{customdata[0]}<br>"
-                        "%{customdata[1]:,.1f}억"
-                        "<extra></extra>"
-                    ),
+                    hovertemplate="%{customdata[0]}<br>%{customdata[1]:,.1f}억<extra></extra>",
                 )
-
                 fig.update_layout(
                     height=340,
                     margin=dict(l=10, r=20, t=20, b=10),
@@ -597,8 +509,7 @@ if st.session_state.menu == "종합 실적":
                     ),
                     showlegend=False,
                 )
-
-                # 차트 툴바 숨김 + 마우스 휠 확대/축소 비활성화
+                # Plotly 차트 툴바를 숨기고, 마우스 휠 확대/축소를 비활성화
                 st.plotly_chart(
                     fig,
                     use_container_width=True,
@@ -608,52 +519,24 @@ if st.session_state.menu == "종합 실적":
                         "doubleClick": False,
                     },
                 )
-
             else:
                 st.info("선택한 기간에 표시할 매출 데이터가 없습니다.")
 
-            # -------------------------------------------------
-            # 상품 랭킹
-            # -------------------------------------------------
             st.markdown("---")
             st.subheader("상품 랭킹")
 
+            # 공통 랭킹 데이터 준비
             ranking_df = filtered_df.copy()
-
             if not ranking_df.empty:
-
-                for col in [
-                    "주차",
-                    "홈쇼핑사",
-                    "상품명",
-                    "총매출액",
-                    "할인가",
-                    "판매건수",
-                ]:
+                for col in ["주차", "홈쇼핑사", "상품명", "총매출액", "할인가", "판매건수"]:
                     if col not in ranking_df.columns:
-                        ranking_df[col] = (
-                            ""
-                            if col in ["주차", "홈쇼핑사", "상품명"]
-                            else 0
-                        )
+                        ranking_df[col] = "" if col in ["주차", "홈쇼핑사", "상품명"] else 0
 
-                # 매출액 TOP 50
-                st.markdown(
-                    '<div class="ranking-heading">'
-                    '<span class="ranking-accent-sales">매출액</span> TOP 50'
-                    '</div>',
-                    unsafe_allow_html=True,
-                )
-
-                sales_top = (
-                    ranking_df.sort_values(
-                        "총매출액",
-                        ascending=False,
-                    )
-                    .head(50)
-                    .copy()
-                )
-
+                # 매출액 TOP 10
+                st.markdown('<div class="ranking-heading"><span class="ranking-accent-sales">매출액</span> TOP 50</div>', unsafe_allow_html=True)
+                sales_top = ranking_df.sort_values(
+                    "총매출액", ascending=False
+                ).head(50).copy()
                 sales_table = pd.DataFrame({
                     "운영 주차": sales_top["주차"],
                     "홈쇼핑사": sales_top["홈쇼핑사"],
@@ -662,31 +545,15 @@ if st.session_state.menu == "종합 실적":
                     "할인가": sales_top["할인가"].map(format_won),
                     "판매건수": sales_top["판매건수"].map(format_count),
                 })
-
                 make_styled_table(sales_table, "총 매출")
 
-                st.markdown(
-                    "<div style='height:20px'></div>",
-                    unsafe_allow_html=True,
-                )
+                st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
-                # 판매량 TOP 50
-                st.markdown(
-                    '<div class="ranking-heading">'
-                    '<span class="ranking-accent-count">판매량</span> TOP 50'
-                    '</div>',
-                    unsafe_allow_html=True,
-                )
-
-                count_top = (
-                    ranking_df.sort_values(
-                        "판매건수",
-                        ascending=False,
-                    )
-                    .head(50)
-                    .copy()
-                )
-
+                # 판매량 TOP 10
+                st.markdown('<div class="ranking-heading"><span class="ranking-accent-count">판매량</span> TOP 50</div>', unsafe_allow_html=True)
+                count_top = ranking_df.sort_values(
+                    "판매건수", ascending=False
+                ).head(50).copy()
                 count_table = pd.DataFrame({
                     "운영 주차": count_top["주차"],
                     "홈쇼핑사": count_top["홈쇼핑사"],
@@ -695,10 +562,107 @@ if st.session_state.menu == "종합 실적":
                     "할인가": count_top["할인가"].map(format_won),
                     "총매출": count_top["총매출액"].map(format_won),
                 })
-
                 make_styled_table(count_table, "판매건수")
-
             else:
-                st.info(
-                    "선택한 기간에 표시할 상품 랭킹 데이터가 없습니다."
+                st.info("선택한 기간에 표시할 상품 랭킹 데이터가 없습니다.")
+
+# =========================================================
+# 7. 메뉴 2 - 상품 검색 / 비교
+# =========================================================
+elif st.session_state.menu == "상품 검색 / 비교":
+    st.title("🔍 상품 검색 / 비교")
+    st.caption("키워드, 가격대, 할인율, 카테고리 등 조건별로 상품을 검색하고 비교합니다.")
+
+    if df.empty:
+        st.warning("데이터를 불러오지 못했습니다.")
+    else:
+        f1, f2, f3 = st.columns(3)
+        with f1:
+            search_kw = st.text_input("상품명 키워드 검색", placeholder="예: 갈비, 코트, 에어프라이어")
+            cats = ["전체"] + sorted(df["카테고리"].dropna().unique().tolist()) if "카테고리" in df else ["전체"]
+            selected_cat = st.selectbox("카테고리 선택", cats)
+        with f2:
+            chans = ["전체"] + sorted(df["홈쇼핑사"].dropna().unique().tolist()) if "홈쇼핑사" in df else ["전체"]
+            selected_chan = st.selectbox("홈쇼핑사 선택", chans)
+            min_discount = st.slider("최소 할인율 (%)", 0, 100, 0, step=5)
+        with f3:
+            max_price = int(df["할인가"].max()) if "할인가" in df.columns and df["할인가"].max() > 0 else 1000000
+            price_range = st.slider("할인가 범위 (원)", 0, max_price, (0, max_price), step=max(1, max_price // 200))
+
+        search_df = df.copy()
+        if search_kw and "상품명" in search_df.columns:
+            search_df = search_df[search_df["상품명"].str.contains(search_kw, case=False, na=False)]
+        if selected_cat != "전체" and "카테고리" in search_df.columns:
+            search_df = search_df[search_df["카테고리"] == selected_cat]
+        if selected_chan != "전체" and "홈쇼핑사" in search_df.columns:
+            search_df = search_df[search_df["홈쇼핑사"] == selected_chan]
+        if "할인율" in search_df.columns:
+            search_df = search_df[search_df["할인율"] >= min_discount]
+        if "할인가" in search_df.columns:
+            search_df = search_df[search_df["할인가"].between(price_range[0], price_range[1])]
+
+        st.markdown("---")
+        c1, c2, c3 = st.columns(3)
+        c1.metric("검색된 상품 수", f"{len(search_df):,}건")
+        c2.metric("검색 상품 총 매출액", format_won(search_df["총매출액"].sum()) if "총매출액" in search_df else "0원")
+        c3.metric("검색 상품 평균 할인가", format_won(search_df["할인가"].mean()) if len(search_df) and "할인가" in search_df else "0원")
+
+        display_df = search_df.copy()
+        for col in ["총매출액", "할인가", "정가", "판매건수"]:
+            if col in display_df.columns:
+                display_df[col] = display_df[col].map(
+                    lambda x: f"{int(round(x)):,}" if pd.notna(x) else ""
                 )
+        if "객단가" in display_df.columns:
+            display_df = display_df.drop(columns=["객단가"])
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
+
+# =========================================================
+# 8. 메뉴 3 - 홈쇼핑사별 분석
+# =========================================================
+elif st.session_state.menu == "홈쇼핑사별 분석":
+    st.title("🏢 홈쇼핑사별 분석")
+    st.caption("제휴 홈쇼핑사별 입점 성과, 히스토리 및 효자 상품을 분석합니다.")
+
+    if df.empty or "홈쇼핑사" not in df.columns:
+        st.warning("홈쇼핑사 데이터가 없습니다.")
+    else:
+        partners = sorted(df["홈쇼핑사"].dropna().unique().tolist())
+        selected_partner = st.selectbox("분석할 홈쇼핑사", partners)
+        partner_df = df[df["홈쇼핑사"] == selected_partner].copy()
+
+        p1, p2, p3 = st.columns(3)
+        p1.metric("누적 진행 상품 수", f"{len(partner_df):,}건")
+        p2.metric("누적 총 매출액", format_won(partner_df["총매출액"].sum()) if "총매출액" in partner_df else "0원")
+        top_cat = partner_df["카테고리"].mode().iloc[0] if "카테고리" in partner_df and not partner_df["카테고리"].mode().empty else "-"
+        p3.metric("주력 카테고리", top_cat)
+
+        st.markdown("---")
+        left, right = st.columns(2)
+        with left:
+            st.subheader(f"{selected_partner} 역대 효자 상품 TOP 5")
+            if "총매출액" in partner_df.columns:
+                top5 = partner_df.sort_values("총매출액", ascending=False).head(5).copy()
+                cols = [c for c in ["주차", "상품명", "총매출액", "판매건수", "할인가"] if c in top5.columns]
+                st.dataframe(top5[cols], use_container_width=True, hide_index=True)
+        with right:
+            st.subheader(f"{selected_partner} 주차별 매출 흐름")
+            if "주차" in partner_df.columns and "총매출액" in partner_df.columns:
+                partner_trend = partner_df.groupby("주차", as_index=False)["총매출액"].sum()
+                partner_trend["_sort"] = partner_trend["주차"].map(week_number)
+                partner_trend = partner_trend.sort_values("_sort")
+                partner_trend["매출(억)"] = partner_trend["총매출액"] / 100000000
+                fig = px.line(partner_trend, x="주차", y="매출(억)", markers=True)
+                fig.update_traces(line=dict(color="#10B981", width=3), hovertemplate="%{x}<br>%{y:,.1f}억<extra></extra>")
+                fig.update_layout(height=300, margin=dict(l=5, r=5, t=15, b=5), showlegend=False)
+                st.plotly_chart(fig, use_container_width=True, config={"scrollZoom": False, "displayModeBar": False})
+
+        st.markdown("---")
+        st.subheader(f"{selected_partner} 전체 딜 진행 히스토리")
+        history = partner_df.copy()
+        if "객단가" in history.columns:
+            history = history.drop(columns=["객단가"])
+        for col in ["총매출액", "할인가", "정가", "판매건수"]:
+            if col in history.columns:
+                history[col] = history[col].map(lambda x: f"{int(round(x)):,}" if pd.notna(x) else "")
+        st.dataframe(history, use_container_width=True, hide_index=True)
