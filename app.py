@@ -9,52 +9,49 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# 커스텀 CSS (메뉴 상단 배치, 폰트 2배+BOLD, 시원한 꽉 찬 가로 클릭, 트렌디 컬러, DATA SOURCE 최하단)
+# 커스텀 CSS (메뉴 상단 완전 고정, 폰트 2배 BOLD, 트렌디 컬러, 최하단 DATA SOURCE)
 st.markdown(
     """
     <style>
-    /* 사이드바 전체 배경 및 최하단 고정을 위한 flex 설정 */
-    [data-testid="stSidebar"] {
+    /* 사이드바 배경 및 최하단 고정을 위한 뷰포트 설정 */
+    section[data-testid="stSidebar"] {
         background-color: #0f172a !important; /* 트렌디 다크 슬레이트 */
-        padding-top: 0rem !important;
     }
-    [data-testid="stSidebar"] > div:first-child {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        padding-top: 1rem !important;
-        padding-left: 0rem !important;
-        padding-right: 0rem !important;
+    section[data-testid="stSidebar"] > div:first-child {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100vh !important;
+        padding: 0px !important;
     }
-    
-    /* 사이드바 상단 타이틀 */
+
+    /* 사이드바 메인 타이틀 */
     .sidebar-header {
         padding: 24px 20px 20px 20px;
-        font-size: 28px !important;
+        font-size: 26px !important;
         font-weight: 900 !important;
         color: #ffffff !important;
         border-bottom: 2px solid #334155 !important;
         letter-spacing: -0.8px;
     }
 
-    /* 상단 메뉴 영역 컨테이너 */
-    .menu-container {
-        flex: 1; /* 상단 영역 차지 */
+    /* 상단 메뉴를 담는 영역 */
+    .menu-box {
+        flex: 1;
     }
 
-    /* 폰트 2배, BOLD, 꽉 찬 가로 영역 어드민 블록 버튼 */
+    /* 커다란 BOLD 어드민 메뉴 버튼 (가로 꽉 차게) */
     div.stButton > button {
         width: 100% !important;
-        height: 72px !important;               /* 버튼 높이 시원하게 확대 */
-        background-color: #0f172a !important;  /* 기본 바탕 */
-        color: #f8fafc !important;             /* 아주 선명한 선홍빛 백색 */
+        height: 72px !important;
+        background-color: #0f172a !important;
+        color: #ffffff !important;
         border: none !important;
-        border-bottom: 2px solid #334155 !important; /* 확실한 선명 구분선 */
+        border-bottom: 2px solid #334155 !important; /* 또렷한 구분선 */
         border-radius: 0px !important;
         text-align: left !important;
         padding-left: 24px !important;
-        font-weight: 900 !important;           /* 강렬한 BOLD */
-        font-size: 23px !important;             /* 폰트 크기 2배 확대 */
+        font-weight: 900 !important;           /* 폰트 극강 BOLD */
+        font-size: 26px !important;             /* 폰트 크기 2배 확대 */
         letter-spacing: -0.5px !important;
         margin: 0px !important;
         display: flex !important;
@@ -62,20 +59,20 @@ st.markdown(
         transition: all 0.2s ease-in-out !important;
     }
     
-    /* 마우스 호버(Hover) 시 트렌디 딥 인디고/퍼플 포인트 반전 효과 */
+    /* 마우스 호버 시 트렌디 인디고 반전 컬러 */
     div.stButton > button:hover {
-        background-color: #4f46e5 !important;   /* 트렌디 인디고 퍼플 */
+        background-color: #4f46e5 !important;
         color: #ffffff !important;
         border-bottom-color: #6366f1 !important;
         cursor: pointer;
     }
 
-    /* 최하단 DATA SOURCE 영역 */
+    /* 최하단 영구 고정 DATA SOURCE */
     .data-source-container {
         padding: 24px 20px;
-        background-color: #020617;              /* 더 짙은 하단 베이스 */
+        background-color: #020617;
         border-top: 2px solid #334155;
-        margin-top: auto !important;           /* 맨 아래로 강제 이동 */
+        margin-top: auto !important;           /* 맨 밑 고정 */
     }
     .data-source-text {
         color: #8a99ad !important;
@@ -83,7 +80,7 @@ st.markdown(
         line-height: 1.6;
     }
     .data-source-text a {
-        color: #818cf8 !important;              /* 트렌디 인디고 링크 컬러 */
+        color: #818cf8 !important;
         text-decoration: underline;
         font-weight: 600;
     }
@@ -142,16 +139,16 @@ if "menu" not in st.session_state:
     st.session_state.menu = "종합 실적"
 
 # ==========================================
-# 사이드바 (상단 메뉴 + 최하단 DATA SOURCE)
+# 사이드바
 # ==========================================
 
-# 1. 최상단 타이틀
+# 1. 상단 타이틀
 st.sidebar.markdown(
     '<div class="sidebar-header">B tv 핫딜 대시보드</div>',
     unsafe_allow_html=True,
 )
 
-# 2. 상단 고정 큰 폰트 BOLD 메뉴 항목
+# 2. 상단 메뉴 박스
 if st.sidebar.button("종합 실적"):
     st.session_state.menu = "종합 실적"
 
