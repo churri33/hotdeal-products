@@ -9,71 +9,74 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# 어드민 사이트 메뉴바 완벽 재현 CSS
+# 사이드바 커스텀 CSS (메뉴 폰트 확대, 선명한 구분선, 호버 효과, 최하단 고정)
 st.markdown(
     """
     <style>
-    /* 사이드바 전체 패딩 제거 및 어드민 딥블루 배경 */
+    /* 사이드바 전체 레이아웃 (플렉스박스로 하단 영역 고정) */
     [data-testid="stSidebar"] {
-        background-color: #2b3245 !important;
+        background-color: #1e293b !important;
         padding-top: 0rem !important;
     }
     [data-testid="stSidebar"] > div:first-child {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        justify-content: space-between;
         padding-top: 1rem !important;
     }
     
-    /* 상단 타이틀 스타일 */
+    /* 상단 타이틀 */
     .sidebar-header {
-        padding: 20px 16px 15px 16px;
-        font-size: 24px;
-        font-weight: 800;
-        color: #ffffff;
-        border-bottom: 1px solid #1f2533;
+        padding: 24px 20px 20px 20px;
+        font-size: 26px !important;
+        font-weight: 800 !important;
+        color: #ffffff !important;
+        border-bottom: 2px solid #334155 !important;
         letter-spacing: -0.5px;
     }
 
-    /* 구분선 + 꽉 찬 영역 어드민 블록 버튼 */
+    /* 선명한 구분선과 커다란 텍스트의 어드민 메뉴 버튼 */
     div.stButton > button {
         width: 100% !important;
-        height: 54px !important;
-        background-color: #2b3245 !important;
-        color: #ffffff !important;
+        height: 64px !important;               /* 버튼 높이 확대 */
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;             /* 가독성 높은 밝은 글자 */
         border: none !important;
-        border-bottom: 1px solid #202636 !important;
-        border-top: 1px solid #384158 !important;
+        border-bottom: 2px solid #334155 !important; /* 명확하고 잘 보이는 구분선 */
         border-radius: 0px !important;
         text-align: left !important;
-        padding-left: 20px !important;
+        padding-left: 24px !important;
         font-weight: 700 !important;
-        font-size: 16px !important;
+        font-size: 19px !important;             /* 폰트 크기 크게 확대 */
         margin: 0px !important;
         display: flex !important;
         align-items: center !important;
-        justify-content: space-between !important;
-        transition: background-color 0.2s ease !important;
+        transition: all 0.2s ease-in-out !important;
     }
     
-    /* 호버 시 어드민 블루 반전 */
+    /* 마우스 호버(Hover) 시 세련된 블루 하이라이트 반전 효과 */
     div.stButton > button:hover {
-        background-color: #1f2533 !important;
+        background-color: #2563eb !important;   /* 선명한 파란색 호버 */
         color: #ffffff !important;
+        border-bottom-color: #2563eb !important;
         cursor: pointer;
     }
 
-    /* 하단 DATA SOURCE 스타일 */
+    /* 하단 DATA SOURCE (맨 밑으로 붙도록 설정) */
     .data-source-container {
-        padding: 20px 16px;
-        background-color: #232938;
-        border-top: 1px solid #1f2533;
-        margin-top: 40px;
+        padding: 24px 20px;
+        background-color: #0f172a;
+        border-top: 2px solid #334155;
+        margin-top: auto !important;           /* 최하단 강제 이동 */
     }
     .data-source-text {
         color: #8a99ad !important;
-        font-size: 13px;
+        font-size: 14px;
         line-height: 1.6;
     }
     .data-source-text a {
-        color: #8a99ad !important;
+        color: #38bdf8 !important;
         text-decoration: underline;
         font-weight: 600;
     }
@@ -127,12 +130,12 @@ def load_data():
 
 df = load_data()
 
-# 세션 상태 초기화 (메뉴 상태 유지)
+# 세션 상태 초기화
 if "menu" not in st.session_state:
     st.session_state.menu = "종합 실적"
 
 # ==========================================
-# 사이드바 (어드민 리얼 네비게이션)
+# 사이드바
 # ==========================================
 
 # 1. 최상단 타이틀
@@ -141,7 +144,7 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 
-# 2. 숫자를 제외한 어드민 메뉴 항목
+# 2. 선명한 구분선의 큰 어드민 메뉴 항목
 if st.sidebar.button("종합 실적"):
     st.session_state.menu = "종합 실적"
 
@@ -151,7 +154,7 @@ if st.sidebar.button("상품 검색 / 비교"):
 if st.sidebar.button("홈쇼핑사별 분석"):
     st.session_state.menu = "홈쇼핑사별 분석"
 
-# 3. 하단 DATA SOURCE
+# 3. 최하단 고정 DATA SOURCE
 st.sidebar.markdown(
     f"""
     <div class="data-source-container">
