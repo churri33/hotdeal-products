@@ -30,8 +30,8 @@ TEXT_COLUMNS = ["주차", "홈쇼핑사", "카테고리", "상품명"]
 st.markdown("""
 <style>
 :root {--purple:#3518C9;--purple-soft:#EEEAFE;--sidebar-line:#E5E9EF;--body-text:#253449;}
-section[data-testid="stSidebar"] {background:#FFF!important;width:240px!important;min-width:240px!important;max-width:240px!important;flex-shrink:0!important;}
-section[data-testid="stSidebar"] > div,section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {background:#FFF!important;}
+section[data-testid="stSidebar"] {background:#F5F3FF!important;width:240px!important;min-width:240px!important;max-width:240px!important;flex-shrink:0!important;}
+section[data-testid="stSidebar"] > div {background:#F5F3FF!important;}
 section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {gap:.45rem;}
 [data-testid="stSidebarCollapseButton"],[data-testid="collapsedControl"],button[kind="header"] {display:none!important;}
 .sidebar-title {color:var(--purple);font-size:23px;font-weight:750;letter-spacing:-.8px;line-height:1.3;text-align:left;padding:0px 14px 28px;margin-bottom:32px;border-bottom:1px solid var(--sidebar-line);white-space:nowrap;}
@@ -43,7 +43,7 @@ section[data-testid="stSidebar"] div[data-testid="stButton"]>button[data-testid=
 section[data-testid="stSidebar"] div[data-testid="stButton"]>button[data-testid="stBaseButton-primary"] *,section[data-testid="stSidebar"] div.stButton>button[kind="primary"] * {color:#3518C9!important;fill:#3518C9!important;}
 section[data-testid="stSidebar"] div.stButton>button:hover {background:var(--purple-soft)!important;color:var(--purple)!important;}
 section[data-testid="stSidebar"] div.stButton>button:focus:not(:active) {box-shadow:none!important;}
-.data-source-fixed {position:fixed;bottom:0;left:0;width:240px;box-sizing:border-box;padding:18px 16px 20px;background:#F7F8FB;border-top:1px solid var(--sidebar-line);z-index:999;color:#6F7E90;font-size:14px;line-height:1.65;}
+.data-source-fixed {width:100%;box-sizing:border-box;padding:18px 16px 20px;background:#F7F8FB;border-top:1px solid var(--sidebar-line);color:#6F7E90;font-size:14px;line-height:1.65;}
 .data-source-fixed strong {color:#26364A;font-size:16px;font-weight:850;letter-spacing:.6px;}
 .data-source-fixed a {color:var(--purple)!important;text-decoration:underline;font-weight:750;}
 .main .block-container {padding-top:2rem;padding-bottom:3rem;}
@@ -76,6 +76,28 @@ div[data-testid="stDownloadButton"] button p {font-size:19px!important;line-heig
 .weekly-ranking-table tbody td:not(.weekly-products) {font-size:15px!important;font-weight:700!important;}
 .weekly-ranking-table tbody td.weekly-products {font-size:15px!important;}
 .weekly-ranking-table tbody td.weekly-blue {color:#3518C9!important;font-weight:800!important;}
+
+/* Sidebar groups and in-page section links */
+section[data-testid="stSidebar"] .st-key-sidebar_active_group {background:#E9E4FF!important;border-radius:10px;padding:5px 6px 9px;border-left:3px solid #6749DD;}
+section[data-testid="stSidebar"] .st-key-sidebar_active_group div.stButton>button[kind="primary"] {background:#DED6FF!important;}
+.sidebar-subnav {padding:1px 4px 3px 14px;display:flex;flex-direction:column;gap:2px;}
+.sidebar-subnav a {display:block;color:#64718A!important;text-decoration:none!important;font-size:13px!important;font-weight:550;padding:7px 8px;border-radius:6px;line-height:1.35;}
+.sidebar-subnav a:hover {background:#DED6FF;color:#3518C9!important;}
+.section-anchor {display:block;position:relative;top:-18px;scroll-margin-top:45px;height:0;}
+section[data-testid="stSidebar"] .st-key-source_panel {position:fixed;bottom:0;left:0;width:240px;box-sizing:border-box;background:#EEEAFB!important;border-top:1px solid #DCD4F6;padding:8px 12px 14px;z-index:10;}
+section[data-testid="stSidebar"] .st-key-source_panel div.stButton>button {min-height:35px!important;background:#FFF!important;border:1px solid #D8D0EF!important;font-size:13px!important;}
+section[data-testid="stSidebar"] .st-key-source_panel div.stButton>button p {font-size:13px!important;text-align:center!important;}
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {padding-bottom:195px!important;}
+body:has(#overview:target) section[data-testid="stSidebar"] a[href="#overview"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
+body:has(#weekly-trend:target) section[data-testid="stSidebar"] a[href="#weekly-trend"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
+body:has(#weekly-ranking:target) section[data-testid="stSidebar"] a[href="#weekly-ranking"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
+body:has(#product-sales:target) section[data-testid="stSidebar"] a[href="#product-sales"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
+body:has(#product-count:target) section[data-testid="stSidebar"] a[href="#product-count"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
+body:has(#product-search:target) section[data-testid="stSidebar"] a[href="#product-search"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
+body:has(#partner-summary:target) section[data-testid="stSidebar"] a[href="#partner-summary"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
+body:has(#partner-top:target) section[data-testid="stSidebar"] a[href="#partner-top"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
+body:has(#partner-trend:target) section[data-testid="stSidebar"] a[href="#partner-trend"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
+body:has(#partner-history:target) section[data-testid="stSidebar"] a[href="#partner-history"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -302,18 +324,31 @@ def weekly_ranking(frame):
 
 
 if "menu" not in st.session_state:
-    st.session_state.menu = "종합 실적"
+    st.session_state.menu = "실적 대시보드"
 
-st.sidebar.markdown('<div class="sidebar-title">B tv 핫딜 대시보드</div>', unsafe_allow_html=True)
-for label in ["종합 실적", "상품 검색 / 비교", "홈쇼핑사별 분석"]:
-    st.sidebar.button(label, key=f"nav_{label}", use_container_width=True,
-                      type="primary" if st.session_state.menu == label else "secondary",
-                      on_click=lambda value=label: st.session_state.update(menu=value))
+st.sidebar.markdown('<div class="sidebar-title">B tv 핫딜🔥🛒</div>', unsafe_allow_html=True)
 
-with st.sidebar:
-    if st.button("↻ 데이터 새로고침", help="캐시를 지우고 구글 시트 데이터를 다시 불러옵니다."):
-        load_data.clear()
-        st.rerun()
+NAV_SECTIONS = {
+    "실적 대시보드": [
+        ("실적 요약", "overview"), ("주간 매출 추이", "weekly-trend"),
+        ("주간 실적 TOP 5", "weekly-ranking"), ("매출액 TOP 50", "product-sales"),
+        ("판매건수 TOP 50", "product-count"),
+    ],
+    "상품 검색 / 비교": [("상품 검색 및 비교", "product-search")],
+    "홈쇼핑사별 분석": [
+        ("홈쇼핑사 종합실적", "partner-summary"), ("역대 효자 상품", "partner-top"),
+        ("주차별 매출 흐름", "partner-trend"), ("전체 딜 진행 히스토리", "partner-history"),
+    ],
+}
+for label, sections in NAV_SECTIONS.items():
+    active = st.session_state.menu == label
+    with st.sidebar.container(key="sidebar_active_group" if active else f"sidebar_group_{list(NAV_SECTIONS).index(label)}"):
+        st.button(label, key=f"nav_{label}", use_container_width=True,
+                  type="primary" if active else "secondary",
+                  on_click=lambda value=label: st.session_state.update(menu=value))
+        if active:
+            links = "".join(f'<a href="#{slug}">{html.escape(title)}</a>' for title, slug in sections)
+            st.markdown(f'<nav class="sidebar-subnav">{links}</nav>', unsafe_allow_html=True)
 
 try:
     df = load_data()
@@ -340,14 +375,24 @@ def last_row_date(frame):
     return str(value).strip()
 
 latest_date = last_row_date(df)
-st.sidebar.markdown(
-    f'<div class="data-source-fixed"><strong>DATA SOURCE</strong><br>'
-    f'↗ <a href="{html.escape(GOOGLE_SHEET_URL, quote=True)}" target="_blank">RAW 구글시트 바로가기</a><br>'
-    f'최종 집계일: {html.escape(latest_date)}</div>', unsafe_allow_html=True,
-)
+with st.sidebar.container(key="source_panel"):
+    st.markdown(
+        f'<div class="data-source-fixed"><strong>DATA SOURCE</strong><br>'
+        f'↗ <a href="{html.escape(GOOGLE_SHEET_URL, quote=True)}" target="_blank">RAW 구글시트 바로가기</a><br>'
+        f'최종 집계일: {html.escape(latest_date)}</div>', unsafe_allow_html=True,
+    )
+    if st.button("↻ 데이터 새로고침", key="refresh_data", use_container_width=True,
+                 help="캐시를 지우고 구글 시트 데이터를 다시 불러옵니다."):
+        load_data.clear()
+        st.rerun()
 
-if st.session_state.menu == "종합 실적":
-    st.title("📊 종합 실적")
+
+def section_anchor(slug):
+    st.markdown(f'<span id="{slug}" class="section-anchor"></span>', unsafe_allow_html=True)
+
+if st.session_state.menu == "실적 대시보드":
+    section_anchor("overview")
+    st.title("📊 실적 대시보드")
     st.markdown('<div class="section-caption">B tv 핫딜 전체 입점 상품의 주요 실적과 랭킹을 한눈에 확인합니다.</div>', unsafe_allow_html=True)
     if df.empty:
         st.warning("데이터를 불러오지 못했거나 시트가 비어 있습니다.")
@@ -388,7 +433,8 @@ if st.session_state.menu == "종합 실적":
             st.markdown("---")
             title_col, _ = st.columns([8, 2])
             with title_col:
-                st.subheader("📈 주차별 매출 추이")
+                section_anchor("weekly-trend")
+                st.subheader("📈 주간 매출 추이")
             if not filtered_df.empty and "총매출액" in filtered_df:
                 trend = filtered_df.groupby("주차", as_index=False)["총매출액"].sum()
                 trend = trend.sort_values("주차", key=lambda s: s.map(week_sort_key))
@@ -414,7 +460,8 @@ if st.session_state.menu == "종합 실적":
             st.markdown("---")
             week_title, _ = st.columns([8, 2])
             with week_title:
-                st.subheader("🥇 주차 랭킹")
+                section_anchor("weekly-ranking")
+                st.subheader("🥇 주간 실적 TOP 5")
             week_table = weekly_ranking(filtered_df) if "주차" in filtered_df else pd.DataFrame()
             caption_col, download_col = st.columns([12, 1], gap="small", vertical_alignment="center")
             with caption_col:
@@ -438,6 +485,7 @@ if st.session_state.menu == "종합 실적":
                 ]:
                     head_col, _ = st.columns([8, 2])
                     with head_col:
+                        section_anchor("product-sales" if kind == "sales" else "product-count")
                         st.markdown(f'<div class="ranking-heading"><span class="ranking-accent-{accent}">{heading}</span></div>',
                                     unsafe_allow_html=True)
                     top = aggregate_products(filtered_df, sort_col=sort_col)
@@ -467,6 +515,7 @@ if st.session_state.menu == "종합 실적":
                     st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
 elif st.session_state.menu == "상품 검색 / 비교":
+    section_anchor("product-search")
     st.title("🔍 상품 검색 / 비교")
     st.caption("키워드, 가격대, 할인율, 카테고리 등 조건별로 상품을 검색하고 비교합니다.")
     if df.empty:
@@ -511,6 +560,7 @@ elif st.session_state.menu == "상품 검색 / 비교":
         st.dataframe(display_df, use_container_width=True, hide_index=True)
 
 elif st.session_state.menu == "홈쇼핑사별 분석":
+    section_anchor("partner-summary")
     st.title("🏢 홈쇼핑사별 분석")
     st.caption("제휴 홈쇼핑사별 입점 성과, 히스토리 및 효자 상품을 분석합니다.")
     if df.empty or "홈쇼핑사" not in df or not df["홈쇼핑사"].ne("").any():
@@ -528,12 +578,14 @@ elif st.session_state.menu == "홈쇼핑사별 분석":
         st.markdown("---")
         left, right = st.columns(2)
         with left:
+            section_anchor("partner-top")
             st.subheader(f"{selected_partner} 역대 효자 상품 TOP 5")
             top5 = aggregate_products(partner_df, top_n=5)
             if not top5.empty:
                 excel_button(top5[["상품명", "총매출액", "판매건수", "운영주차수"]], "홈쇼핑사_TOP5.xlsx", "효자 상품 TOP5", "download_partner_top5")
                 st.dataframe(top5[["상품명", "총매출액", "판매건수", "운영주차수"]], use_container_width=True, hide_index=True)
         with right:
+            section_anchor("partner-trend")
             st.subheader(f"{selected_partner} 주차별 매출 흐름")
             if "주차" in partner_df and "총매출액" in partner_df:
                 trend = partner_df.groupby("주차", as_index=False)["총매출액"].sum()
@@ -547,6 +599,7 @@ elif st.session_state.menu == "홈쇼핑사별 분석":
                                   showlegend=False)
                 st.plotly_chart(fig, use_container_width=True, config={"scrollZoom": False, "displayModeBar": False})
         st.markdown("---")
+        section_anchor("partner-history")
         st.subheader(f"{selected_partner} 전체 딜 진행 히스토리")
         history = partner_df.drop(columns=["객단가"], errors="ignore").copy()
         for col in ("총매출액", "할인가", "정가", "판매건수"):
