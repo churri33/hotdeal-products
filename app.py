@@ -332,7 +332,8 @@ NAV_SECTIONS = {
     "실적 대시보드": [
         ("실적 요약", "overview"), ("주간 매출 추이", "weekly-trend"),
         ("주간 랭킹 (매출액)", "weekly-ranking"),
-        ("상품 랭킹 (매출액/판매건수)", "product-sales"),
+        ("상품 랭킹 (매출액)", "product-sales"),
+        ("상품 랭킹 (판매건수)", "product-count"),
     ],
     "상품 검색 / 비교": [("상품 검색 및 비교", "product-search")],
     "홈쇼핑사별 분석": [
@@ -462,7 +463,7 @@ if st.session_state.menu == "실적 대시보드":
             week_title, week_download = st.columns([12, 1], gap="small", vertical_alignment="center")
             with week_title:
                 section_anchor("weekly-ranking")
-                st.subheader("🥇 주간 랭킹 (매출액)")
+                st.subheader("🥇 주간 랭킹")
             if not week_table.empty:
                 with week_download:
                     excel_button(week_table, "주차_랭킹_TOP5.xlsx", "주차 랭킹 TOP5", "download_week_ranking", inline=True)
