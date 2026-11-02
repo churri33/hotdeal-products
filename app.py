@@ -217,12 +217,36 @@ def aggregate_products(frame, sort_col="총매출액", top_n=50):
 
 
 def parse_sheet_date(value):
-    """구글 시트 날짜 문자열/일시/엑셀 날짜 일련번호를 날짜로 변환."""
-    if pd.isna(value) or str(value).strip() == "":
+    """시트 날짜: 7/28 (화), 8/3 (월), 2026-07-28, 엑셀 날짜 숫자 지원."""
+    if pd.isna(value) or not str(value).strip():
         return pd.NaT
-    if isinstance(value, (int, float)) or (isinstance(value, str) and re.fullmatch(r"\d{5}(?:\.0)?", value.strip())):
+    raw = str(value).strip()
+    if isinstance(value, (int, float)) or re.fullmatch(r"\d{5}(?:\.0)?", raw):
         return pd.to_datetime(float(value), unit="D", origin="1899-12-30", errors="coerce")
-    return pd.to_datetime(value, errors="coerce")
+
+    # 연도가 생략된 '7/28 (화)' 같은 표기: 요일로 연도를 확인한다.
+    m = re.fullmatch(r"(\d{1,2})\s*[./-]\s*(\d{1,2})\s*(?:\(([월화수목금토일])\))?", raw)
+    if m:
+        month, day = int(m.group(1)), int(m.group(2))
+        weekday = m.group(3)
+        today = pd.Timestamp.today().normalize()
+        weekday_numbers = {"월": 0, "화": 1, "수": 2, "목": 3, "금": 4, "토": 5, "일": 6}
+        candidates = []
+        for year in range(today.year - 5, today.year + 2):
+            try:
+                candidate = pd.Timestamp(year=year, month=month, day=day)
+                if weekday is None or candidate.weekday() == weekday_numbers[weekday]:
+                    candidates.append(candidate)
+            except ValueError:
+                pass
+        if candidates:
+            # 날짜가 오늘보다 너무 먼 미래로 해석되지 않도록 최근 날짜를 우선한다.
+            return min(candidates, key=lambda d: (d > today + pd.Timedelta(days=35), abs((today - d).days)))
+        return pd.NaT
+
+    # '2026. 7. 28 (화)'처럼 연도가 포함된 날짜의 요일 괄호 제거
+    raw = re.sub(r"\s*\([월화수목금토일]\)\s*$", "", raw).strip()
+    return pd.to_datetime(raw, errors="coerce")
 
 
 def format_sales_period(week_data):
@@ -309,7 +333,7 @@ def last_row_date(frame):
     value = populated.iloc[-1, 1]  # B1749 -> B1750 -> ...
     if pd.isna(value) or not str(value).strip():
         return "마지막 행 B열 날짜 없음"
-    parsed = pd.to_datetime(str(value).strip(), errors="coerce")
+    parsed = parse_sheet_date(value)
     if pd.notna(parsed):
         return parsed.strftime("%y.%m.%d")
     # 날짜가 비표준 문자열이면 원본 B열 값을 그대로 표시한다.
