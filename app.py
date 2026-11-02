@@ -331,8 +331,8 @@ st.sidebar.markdown('<div class="sidebar-title">B tv 핫딜🔥🛒</div>', unsa
 NAV_SECTIONS = {
     "실적 대시보드": [
         ("실적 요약", "overview"), ("주간 매출 추이", "weekly-trend"),
-        ("주간 실적 TOP 5", "weekly-ranking"), ("매출액 TOP 50", "product-sales"),
-        ("판매건수 TOP 50", "product-count"),
+        ("주간 랭킹 (매출액)", "weekly-ranking"),
+        ("상품 랭킹 (매출액/판매건수)", "product-sales"),
     ],
     "상품 검색 / 비교": [("상품 검색 및 비교", "product-search")],
     "홈쇼핑사별 분석": [
@@ -458,16 +458,13 @@ if st.session_state.menu == "실적 대시보드":
 
             # 새로 추가한 주차 랭킹 (그래프 아래 / 상품 랭킹 위)
             st.markdown("---")
-            week_title, _ = st.columns([8, 2])
+            week_table = weekly_ranking(filtered_df) if "주차" in filtered_df else pd.DataFrame()
+            week_title, week_download = st.columns([12, 1], gap="small", vertical_alignment="center")
             with week_title:
                 section_anchor("weekly-ranking")
-                st.subheader("🥇 주간 실적 TOP 5")
-            week_table = weekly_ranking(filtered_df) if "주차" in filtered_df else pd.DataFrame()
-            caption_col, download_col = st.columns([12, 1], gap="small", vertical_alignment="center")
-            with caption_col:
-                st.caption("선택 기간 내 주차별 총매출 TOP 5 · 상품 개수는 해당 주차의 데이터 행 수 기준")
+                st.subheader("🥇 주간 랭킹 (매출액)")
             if not week_table.empty:
-                with download_col:
+                with week_download:
                     excel_button(week_table, "주차_랭킹_TOP5.xlsx", "주차 랭킹 TOP5", "download_week_ranking", inline=True)
                 make_styled_table(week_table, widths=[5, 10, 23, 20, 9, 33], weekly=True)
             else:
@@ -475,7 +472,6 @@ if st.session_state.menu == "실적 대시보드":
 
             st.markdown("---")
             st.subheader("🏆 상품 랭킹")
-            st.caption("동일한 상품명은 선택 기간 내 매출액·판매건수를 합산해 순위를 계산합니다.")
             if filtered_df.empty:
                 st.info("선택한 기간에 표시할 상품 랭킹 데이터가 없습니다.")
             else:
@@ -483,11 +479,6 @@ if st.session_state.menu == "실적 대시보드":
                     ("sales", "총매출액", "sales", "① 매출액 TOP 50", "매출액_TOP50.xlsx", "download_sales_top50"),
                     ("count", "판매건수", "count", "② 판매건수 TOP 50", "판매건수_TOP50.xlsx", "download_count_top50"),
                 ]:
-                    head_col, _ = st.columns([8, 2])
-                    with head_col:
-                        section_anchor("product-sales" if kind == "sales" else "product-count")
-                        st.markdown(f'<div class="ranking-heading"><span class="ranking-accent-{accent}">{heading}</span></div>',
-                                    unsafe_allow_html=True)
                     top = aggregate_products(filtered_df, sort_col=sort_col)
                     if top.empty:
                         st.info("표시할 상품이 없습니다.")
@@ -510,7 +501,13 @@ if st.session_state.menu == "실적 대시보드":
                             "할인가": top["할인가"].map(format_won),
                         })
                         highlight = "판매건수"
-                    excel_button(table, file_name, heading.replace("① ", "").replace("② ", ""), key)
+                    head_col, download_col = st.columns([12, 1], gap="small", vertical_alignment="center")
+                    with head_col:
+                        section_anchor("product-sales" if kind == "sales" else "product-count")
+                        st.markdown(f'<div class="ranking-heading"><span class="ranking-accent-{accent}">{heading}</span></div>',
+                                    unsafe_allow_html=True)
+                    with download_col:
+                        excel_button(table, file_name, heading.replace("① ", "").replace("② ", ""), key, inline=True)
                     make_styled_table(table, highlight)
                     st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
