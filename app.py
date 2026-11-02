@@ -80,7 +80,7 @@ div[data-testid="stDownloadButton"] button p {font-size:19px!important;line-heig
 /* Sidebar groups and in-page section links */
 section[data-testid="stSidebar"] .st-key-sidebar_active_group {background:#E9E4FF!important;border-radius:10px;padding:5px 6px 9px;border-left:3px solid #6749DD;}
 section[data-testid="stSidebar"] .st-key-sidebar_active_group div.stButton>button[kind="primary"] {background:#DED6FF!important;}
-.sidebar-subnav {padding:1px 4px 3px 14px;display:flex;flex-direction:column;gap:2px;}
+.sidebar-subnav {padding:1px 4px 19px 14px;display:flex;flex-direction:column;gap:2px;}
 .sidebar-subnav a {display:block;color:#64718A!important;text-decoration:none!important;font-size:13px!important;font-weight:550;padding:7px 8px;border-radius:6px;line-height:1.35;}
 .sidebar-subnav a:hover {background:#DED6FF;color:#3518C9!important;}
 .section-anchor {display:block;position:relative;top:-18px;scroll-margin-top:45px;height:0;}
