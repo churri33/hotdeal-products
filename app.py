@@ -33,7 +33,7 @@ section[data-testid="stSidebar"] {background:#FFF!important;width:240px!importan
 section[data-testid="stSidebar"] > div,section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {background:#FFF!important;}
 section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {gap:.45rem;}
 [data-testid="stSidebarCollapseButton"],[data-testid="collapsedControl"],button[kind="header"] {display:none!important;}
-.sidebar-title {color:var(--purple);font-size:23px;font-weight:750;letter-spacing:-.8px;line-height:1.3;text-align:left;padding:22px 14px 20px;margin-bottom:12px;border-bottom:1px solid var(--sidebar-line);white-space:nowrap;}
+.sidebar-title {color:var(--purple);font-size:23px;font-weight:750;letter-spacing:-.8px;line-height:1.3;text-align:left;padding:8px 14px 22px;margin-bottom:25px;border-bottom:1px solid var(--sidebar-line);white-space:nowrap;}
 section[data-testid="stSidebar"] div.stButton {width:100%!important;margin:0!important;}
 section[data-testid="stSidebar"] div.stButton>button {display:flex!important;width:100%!important;min-height:54px!important;border:0!important;border-radius:6px!important;background:transparent!important;color:#253449!important;text-align:left!important;justify-content:flex-start!important;padding:0 16px!important;font-size:19px!important;font-weight:600!important;letter-spacing:-.35px!important;box-shadow:none!important;white-space:nowrap!important;}
 section[data-testid="stSidebar"] div.stButton>button>div {display:flex!important;width:100%!important;justify-content:flex-start!important;text-align:left!important;}
@@ -61,7 +61,13 @@ table.ranking-table {width:100%;table-layout:fixed;border-collapse:collapse;font
 .ranking-table .weekly-products {text-align:left;line-height:1.65;padding:10px 12px;}
 .ranking-table .weekly-products div+div {margin-top:4px;}
 /* 엑셀 아이콘과 다운로드 화살표만 표시되는 버튼 */
-div[data-testid="stDownloadButton"] button {font-size:15px!important;font-weight:700!important;white-space:nowrap!important;min-height:38px!important;max-width:90px!important;margin-left:auto!important;}
+div[data-testid="stDownloadButton"] {display:flex!important;justify-content:flex-end!important;width:100%!important;}
+div[data-testid="stDownloadButton"] button {font-size:17px!important;font-weight:750!important;min-height:38px!important;height:38px!important;width:75px!important;padding:4px 9px 4px 37px!important;margin:0!important;justify-content:center!important;background-image:url("data:image/png;base64,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")!important;background-repeat:no-repeat!important;background-size:23px 23px!important;background-position:10px center!important;border:1px solid #D8DFE6!important;border-radius:7px!important;}
+/* 다운로드 버튼을 표 바로 위의 오른쪽에 정렬 */
+div[data-testid="stDownloadButton"] button p {margin:0!important;}
+.weekly-ranking-table tbody td:not(.weekly-products) {font-size:26px!important;font-weight:700!important;}
+.weekly-ranking-table tbody td.weekly-products {font-size:13px!important;}
+.weekly-ranking-table tbody td.weekly-blue {color:#3518C9!important;font-weight:800!important;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -108,7 +114,7 @@ def dataframe_to_excel(frame, sheet_name="데이터"):
 
 def excel_button(frame, filename, sheet_name, key):
     st.download_button(
-        label="↓", icon=":material/table_view:",
+        label="↓",
         data=dataframe_to_excel(frame, sheet_name), file_name=filename,
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         key=key, help="엑셀(.xlsx) 다운로드", use_container_width=False,
@@ -134,15 +140,17 @@ def make_styled_table(frame, highlight_column=None, widths=None, weekly=False):
             if col == highlight_column:
                 sales = col in ("총 매출", "총매출", "총 매출액")
                 style = f'background:{"#EEEAFE" if sales else "#E2F5EF"};color:{"#3518C9" if sales else "#087A52"};font-weight:800;'
+            if weekly and col in ("운영주차", "총 매출액"):
+                style += "color:#3518C9;font-weight:800;"
             if weekly and col == "TOP 5 상품":
                 value = "".join(f"<div>{html.escape(part)}</div>" for part in str(row[col]).split("\n") if part)
                 style += "text-align:left;"
                 cells.append(f'<td class="weekly-products" style="{style}">{value}</td>')
             else:
-                cells.append(f'<td style="{style}">{value}</td>')
+                cells.append(f'<td class="{"weekly-blue" if weekly and col in ("운영주차", "총 매출액") else ""}" style="{style}">{value}</td>')
         rows.append("<tr>" + "".join(cells) + "</tr>")
     st.markdown(
-        '<div class="ranking-table-wrap"><table class="ranking-table">'
+        f'<div class="ranking-table-wrap"><table class="ranking-table {"weekly-ranking-table" if weekly else ""}">'
         f'<colgroup>{col_styles}</colgroup><thead><tr>{headers}</tr></thead>'
         f'<tbody>{"".join(rows)}</tbody></table></div>',
         unsafe_allow_html=True,
@@ -208,7 +216,7 @@ def weekly_ranking(frame):
             for i, (_, r) in enumerate(products.iterrows(), start=1)
         ) or "-"
         rows.append({"순위": rank, "운영주차": week,
-                     "총 매출액": format_won(item["총매출액"]),
+                     "총 매출액": f"{format_eok(item['총매출액'])} ({format_won(item['총매출액'])})",
                      "상품 개수": f"{int(item['상품개수']):,}개", "TOP 5 상품": top5_text})
     return pd.DataFrame(rows)
 
@@ -233,14 +241,26 @@ except Exception as exc:
     st.error(f"구글 시트 데이터를 불러오지 못했습니다: {exc}")
     df = pd.DataFrame()
 
-# 데이터에 실제 집계일/기준일 컬럼이 있을 때만 표시 (없으면 임의의 날짜를 만들지 않음).
-latest_date = "시트 데이터 기준"
-for date_col in ("집계일", "최종 집계일", "기준일", "집계날짜"):
-    if date_col in df.columns:
-        parsed = pd.to_datetime(df[date_col], errors="coerce").dropna()
-        if not parsed.empty:
-            latest_date = parsed.max().strftime("%y.%m.%d")
-            break
+# 마지막 유효 데이터 행의 날짜를 표시 (최댓값이 아닌 마지막 행 기준).
+def last_row_date(frame):
+    if frame.empty:
+        return "확인 불가"
+    date_candidates = [c for c in frame.columns if any(k in str(c).replace(" ", "") for k in
+                       ("집계일", "기준일", "등록일", "진행일", "방송일", "운영일", "판매일", "날짜", "일자", "date", "Date"))]
+    # 마지막 유효 데이터 행에서 날짜 컬럼을 우선 탐색.
+    populated = frame.dropna(how="all")
+    if populated.empty:
+        return "확인 불가"
+    last = populated.iloc[-1]
+    for c in date_candidates:
+        raw = str(last[c]).strip()
+        if raw and raw.lower() not in ("nan", "nat", "none", ""):
+            parsed = pd.to_datetime(raw, errors="coerce")
+            if pd.notna(parsed):
+                return parsed.strftime("%y.%m.%d")
+    return "날짜 컬럼 확인 필요"
+
+latest_date = last_row_date(df)
 st.sidebar.markdown(
     f'<div class="data-source-fixed"><strong>DATA SOURCE</strong><br>'
     f'↗ <a href="{html.escape(GOOGLE_SHEET_URL, quote=True)}" target="_blank">RAW 구글시트 바로가기</a><br>'
@@ -322,7 +342,7 @@ if st.session_state.menu == "종합 실적":
             if not week_table.empty:
                 with week_download:
                     excel_button(week_table, "주차_랭킹_TOP5.xlsx", "주차 랭킹 TOP5", "download_week_ranking")
-                make_styled_table(week_table, "총 매출액", widths=[6, 12, 17, 12, 53], weekly=True)
+                make_styled_table(week_table, widths=[6, 12, 22, 10, 50], weekly=True)
             else:
                 st.info("표시할 주차 랭킹이 없습니다.")
 
@@ -407,8 +427,9 @@ elif st.session_state.menu == "상품 검색 / 비교":
         for col in ("총매출액", "할인가", "정가", "판매건수"):
             if col in display_df:
                 display_df[col] = display_df[col].map(lambda x: f"{int(round(x)):,}" if pd.notna(x) else "")
-        st.dataframe(display_df, use_container_width=True, hide_index=True)
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
         excel_button(search_df.drop(columns=["객단가"], errors="ignore"), "상품_검색_결과.xlsx", "상품 검색 결과", "download_search")
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
 
 elif st.session_state.menu == "홈쇼핑사별 분석":
     st.title("🏢 홈쇼핑사별 분석")
@@ -431,6 +452,7 @@ elif st.session_state.menu == "홈쇼핑사별 분석":
             st.subheader(f"{selected_partner} 역대 효자 상품 TOP 5")
             top5 = aggregate_products(partner_df, top_n=5)
             if not top5.empty:
+                excel_button(top5[["상품명", "총매출액", "판매건수", "운영주차수"]], "홈쇼핑사_TOP5.xlsx", "효자 상품 TOP5", "download_partner_top5")
                 st.dataframe(top5[["상품명", "총매출액", "판매건수", "운영주차수"]], use_container_width=True, hide_index=True)
         with right:
             st.subheader(f"{selected_partner} 주차별 매출 흐름")
@@ -451,6 +473,6 @@ elif st.session_state.menu == "홈쇼핑사별 분석":
         for col in ("총매출액", "할인가", "정가", "판매건수"):
             if col in history:
                 history[col] = history[col].map(lambda x: f"{int(round(x)):,}" if pd.notna(x) else "")
-        st.dataframe(history, use_container_width=True, hide_index=True)
         excel_button(partner_df.drop(columns=["객단가"], errors="ignore"),
                      "홈쇼핑사_진행_히스토리.xlsx", "진행 히스토리", "download_partner")
+        st.dataframe(history, use_container_width=True, hide_index=True)
