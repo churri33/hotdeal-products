@@ -50,7 +50,8 @@ section[data-testid="stSidebar"] div.stButton>button:focus:not(:active) {box-sha
 .section-caption {color:#8291A0;font-size:13px;margin-top:-8px;margin-bottom:18px;}
 .kpi-card {background:#F1F3F7;border:1px solid #E3E7ED;border-radius:10px;padding:19px 20px 17px;min-height:137px;box-sizing:border-box;}
 .kpi-label {color:#536276;font-size:16px;font-weight:750;margin-bottom:14px;text-align:left;}
-.kpi-value {color:#202D40;font-size:clamp(23px,2.1vw,31px);font-weight:850;letter-spacing:-.8px;line-height:1.15;white-space:nowrap;text-align:right;}
+.kpi-value {color:#202D40;font-size:32px;font-weight:850;letter-spacing:-.8px;line-height:1.15;white-space:nowrap;text-align:right;}
+.kpi-value .kpi-unit {font-size:18px;font-weight:750;}
 .kpi-sub {color:#8994A3;font-size:12px;margin-top:9px;text-align:right;}
 .ranking-heading {font-size:20px;font-weight:850;margin:12px 0 10px;color:#27364A;}
 .ranking-accent-sales {color:#3518C9;}.ranking-accent-count {color:#0A9470;}
@@ -177,6 +178,10 @@ def make_styled_table(frame, highlight_column=None, widths=None, weekly=False):
 @st.cache_data(ttl=300, show_spinner="구글 시트 데이터 불러오는 중...")
 def load_data():
     data = pd.read_csv(SHEET_CSV_URL)
+    # 원본 구글 시트 B열=편성시작일, C열=최종집계일 (열 위치 기준)
+    if data.shape[1] >= 3:
+        data["_편성시작일"] = data.iloc[:, 1].copy()
+        data["_최종집계일"] = data.iloc[:, 2].copy()
     data.columns = data.columns.astype(str).str.strip()
     data = data.rename(columns=COLUMN_MAPPING)
     if data.columns.duplicated().any():
@@ -211,10 +216,42 @@ def aggregate_products(frame, sort_col="총매출액", top_n=50):
     return result.head(top_n).reset_index(drop=True)
 
 
+def parse_sheet_date(value):
+    """구글 시트 날짜 문자열/일시/엑셀 날짜 일련번호를 날짜로 변환."""
+    if pd.isna(value) or str(value).strip() == "":
+        return pd.NaT
+    if isinstance(value, (int, float)) or (isinstance(value, str) and re.fullmatch(r"\d{5}(?:\.0)?", value.strip())):
+        return pd.to_datetime(float(value), unit="D", origin="1899-12-30", errors="coerce")
+    return pd.to_datetime(value, errors="coerce")
+
+
+def format_sales_period(week_data):
+    """주차 내 가장 이른 편성시작일 ~ 가장 늦은 최종집계일 (양끝 포함)."""
+    if "_편성시작일" not in week_data or "_최종집계일" not in week_data:
+        return "-"
+    starts = week_data["_편성시작일"].map(parse_sheet_date).dropna()
+    ends = week_data["_최종집계일"].map(parse_sheet_date).dropna()
+    if starts.empty or ends.empty:
+        return "-"
+    start, end = starts.min().normalize(), ends.max().normalize()
+    if end < start:
+        return "-"
+    days = (end - start).days + 1
+    return f"{start:%y.%m.%d}-{end:%y.%m.%d} ({days}일)"
+
+
+def format_kpi_value(value):
+    """숫자 32px, 단위(주/억/만건/종) 18px."""
+    match = re.fullmatch(r"([\d,.]+)(주|억|만건|종)", str(value))
+    if not match:
+        return html.escape(str(value))
+    return f'{match.group(1)}<span class="kpi-unit">{match.group(2)}</span>'
+
+
 def weekly_ranking(frame):
     """매출액 TOP5 주차. 상품 개수는 해당 주차의 데이터 행 수."""
     if frame.empty:
-        return pd.DataFrame(columns=["순위", "운영주차", "총 매출액", "상품 개수", "TOP 5 상품"])
+        return pd.DataFrame(columns=["순위", "운영주차", "판매날짜", "총 매출액", "상품 개수", "TOP 5 상품"])
     work = frame.copy()
     for col in ("총매출액", "상품명"):
         if col not in work.columns:
@@ -225,7 +262,8 @@ def weekly_ranking(frame):
     rows = []
     for rank, (_, item) in enumerate(summary.iterrows(), start=1):
         week = item["주차"]
-        week_data = work[(work["주차"] == week) & (work["상품명"].ne(""))]
+        all_week_data = work[work["주차"] == week]
+        week_data = all_week_data[all_week_data["상품명"].ne("")]
         products = (week_data.groupby("상품명", as_index=False)["총매출액"].sum()
                     .sort_values(["총매출액", "상품명"], ascending=[False, True]).head(5))
         top5_text = "\n".join(
@@ -233,6 +271,7 @@ def weekly_ranking(frame):
             for i, (_, r) in enumerate(products.iterrows(), start=1)
         ) or "-"
         rows.append({"순위": rank, "운영주차": week,
+                     "판매날짜": format_sales_period(all_week_data),
                      "총 매출액": f"{format_eok(item['총매출액'])} ({format_won(item['총매출액'])})",
                      "상품 개수": f"{int(item['상품개수']):,}개", "TOP 5 상품": top5_text})
     return pd.DataFrame(rows)
@@ -320,7 +359,7 @@ if st.session_state.menu == "종합 실적":
             for col, (label, value, sub) in zip(st.columns(4), kpis):
                 with col:
                     st.markdown(f'<div class="kpi-card"><div class="kpi-label">{label}</div>'
-                                f'<div class="kpi-value">{value}</div><div class="kpi-sub">{sub}</div></div>',
+                                f'<div class="kpi-value">{format_kpi_value(value)}</div><div class="kpi-sub">{sub}</div></div>',
                                 unsafe_allow_html=True)
             st.markdown("---")
             title_col, _ = st.columns([8, 2])
@@ -359,7 +398,7 @@ if st.session_state.menu == "종합 실적":
             if not week_table.empty:
                 with download_col:
                     excel_button(week_table, "주차_랭킹_TOP5.xlsx", "주차 랭킹 TOP5", "download_week_ranking", inline=True)
-                make_styled_table(week_table, widths=[6, 12, 22, 10, 50], weekly=True)
+                make_styled_table(week_table, widths=[5, 10, 23, 20, 9, 33], weekly=True)
             else:
                 st.info("표시할 주차 랭킹이 없습니다.")
 
