@@ -441,10 +441,6 @@ NAV_SECTIONS = {
         ("상품 랭킹 (판매건수)", "product-count"),
     ],
     "상품 검색": [],
-    "홈쇼핑사별 분석": [
-        ("홈쇼핑사 종합실적", "partner-summary"), ("역대 효자 상품", "partner-top"),
-        ("주차별 매출 흐름", "partner-trend"), ("전체 딜 진행 히스토리", "partner-history"),
-    ],
 }
 for label, sections in NAV_SECTIONS.items():
     active = st.session_state.menu == label
@@ -768,54 +764,3 @@ elif st.session_state.menu == "상품 검색":
                 with download:
                     excel_button(shown, "상품별_실적_비교.xlsx", "상품별 실적 비교", "download_search_summary", inline=True)
                 st.dataframe(shown, use_container_width=True, hide_index=True, height=min(440, 40 + 36 * len(shown)))
-
-
-elif st.session_state.menu == "홈쇼핑사별 분석":
-    section_anchor("partner-summary")
-    st.title("🏢 홈쇼핑사별 분석")
-    st.caption("제휴 홈쇼핑사별 입점 성과, 히스토리 및 효자 상품을 분석합니다.")
-    if df.empty or "홈쇼핑사" not in df or not df["홈쇼핑사"].ne("").any():
-        st.warning("홈쇼핑사 데이터가 없습니다.")
-    else:
-        partners = sorted(v for v in df["홈쇼핑사"].unique() if v)
-        selected_partner = st.selectbox("분석할 홈쇼핑사", partners)
-        partner_df = df[df["홈쇼핑사"] == selected_partner].copy()
-        p1, p2, p3 = st.columns(3)
-        count_unique = partner_df["상품명"].loc[partner_df["상품명"].ne("")].nunique() if "상품명" in partner_df else 0
-        p1.metric("누적 진행 상품 종류", f"{count_unique:,}종")
-        p2.metric("누적 총 매출액", format_won(partner_df["총매출액"].sum()) if "총매출액" in partner_df else "0원")
-        top_cat = partner_df["카테고리"].loc[partner_df["카테고리"].ne("")].mode() if "카테고리" in partner_df else pd.Series(dtype=str)
-        p3.metric("주력 카테고리", top_cat.iloc[0] if not top_cat.empty else "-")
-        st.markdown("---")
-        left, right = st.columns(2)
-        with left:
-            section_anchor("partner-top")
-            st.subheader(f"{selected_partner} 역대 효자 상품 TOP 5")
-            top5 = aggregate_products(partner_df, top_n=5)
-            if not top5.empty:
-                excel_button(top5[["상품명", "총매출액", "판매건수", "운영주차수"]], "홈쇼핑사_TOP5.xlsx", "효자 상품 TOP5", "download_partner_top5")
-                st.dataframe(top5[["상품명", "총매출액", "판매건수", "운영주차수"]], use_container_width=True, hide_index=True)
-        with right:
-            section_anchor("partner-trend")
-            st.subheader(f"{selected_partner} 주차별 매출 흐름")
-            if "주차" in partner_df and "총매출액" in partner_df:
-                trend = partner_df.groupby("주차", as_index=False)["총매출액"].sum()
-                trend = trend.sort_values("주차", key=lambda s: s.map(week_sort_key))
-                trend["매출(억)"] = trend["총매출액"] / 100_000_000
-                fig = px.line(trend, x="주차", y="매출(억)", markers=True)
-                fig.update_traces(line=dict(color="#10B981", width=3),
-                                  hovertemplate="%{x}<br>%{y:,.2f}억<extra></extra>")
-                fig.update_layout(height=300, margin=dict(l=5, r=5, t=15, b=5),
-                                  xaxis=dict(type="category", categoryorder="array", categoryarray=trend["주차"].tolist()),
-                                  showlegend=False)
-                st.plotly_chart(fig, use_container_width=True, config={"scrollZoom": False, "displayModeBar": False})
-        st.markdown("---")
-        section_anchor("partner-history")
-        st.subheader(f"{selected_partner} 전체 딜 진행 히스토리")
-        history = partner_df.drop(columns=["객단가"], errors="ignore").copy()
-        for col in ("총매출액", "할인가", "정가", "판매건수"):
-            if col in history:
-                history[col] = history[col].map(lambda x: f"{int(round(x)):,}" if pd.notna(x) else "")
-        excel_button(partner_df.drop(columns=["객단가"], errors="ignore"),
-                     "홈쇼핑사_진행_히스토리.xlsx", "진행 히스토리", "download_partner")
-        st.dataframe(history, use_container_width=True, hide_index=True)
