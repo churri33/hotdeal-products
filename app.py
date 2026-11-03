@@ -523,7 +523,26 @@ elif st.session_state.menu == "상품 검색 / 비교":
         st.warning("상품 데이터를 불러오지 못했습니다.")
     else:
         st.markdown("### 상품명 키워드 검색")
-        search_kw = st.text_input("상품명 키워드 검색", placeholder="예: 김치, 갈비, 사과", label_visibility="collapsed", key="product_keyword")
+        search_col, _search_space = st.columns([1, 1], gap="medium")
+        with search_col:
+            search_kw = st.text_input("상품명 키워드 검색", placeholder="예: 김치, 갈비, 사과", label_visibility="collapsed", key="product_keyword")
+            # 입력한 키워드가 포함된 실제 상품명만 자동완성 후보로 표시합니다.
+            keyword = search_kw.strip()
+            matched_names = (
+                sorted(df.loc[df["상품명"].astype(str).str.contains(keyword, case=False, na=False, regex=False), "상품명"]
+                       .dropna().astype(str).unique(), key=str.casefold)
+                if keyword else []
+            )
+            chosen_name = None
+            if matched_names:
+                options = ["전체 검색 결과 보기"] + matched_names
+                chosen_name = st.selectbox(
+                    "검색된 상품명 선택 (자동완성)", options, index=0,
+                    key=f"product_suggestion_{keyword}",
+                    help="상품명을 선택하면 해당 상품의 실적만 확인할 수 있습니다."
+                )
+            elif keyword:
+                st.caption("일치하는 상품명이 없습니다.")
         with st.expander("검색 조건 설정 (선택)", expanded=False):
             f1, f2, f3 = st.columns(3)
             with f1:
@@ -539,7 +558,10 @@ elif st.session_state.menu == "상품 검색 / 비교":
         if not search_kw.strip():
             st.info("상품명 키워드를 입력하면 상품별 실적 비교, 매출 그래프, 편성 이력이 나타납니다.")
         else:
-            result = df[df["상품명"].str.contains(search_kw.strip(), case=False, na=False, regex=False)].copy()
+            if chosen_name and chosen_name != "전체 검색 결과 보기":
+                result = df[df["상품명"].astype(str).eq(chosen_name)].copy()
+            else:
+                result = df[df["상품명"].astype(str).str.contains(search_kw.strip(), case=False, na=False, regex=False)].copy()
             if selected_weeks and "주차" in result:
                 result = result[result["주차"].isin(selected_weeks)]
             if selected_partners and "홈쇼핑사" in result:
