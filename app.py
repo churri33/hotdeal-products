@@ -145,6 +145,40 @@ div[data-testid="stDownloadButton"] button p {font-size:19px!important;line-heig
 }
 .st-key-search_kpi_3 summary p:last-child {font-size:11px!important;margin-top:5px!important;}
 .st-key-search_kpi_3 summary p:nth-child(2) {margin-top:8px!important;}
+
+/* KPI cards: fixed bottom alignment; product name sits above the highest-sales value. */
+.st-key-search_kpi_0 summary [data-testid="stMarkdownContainer"],
+.st-key-search_kpi_1 summary [data-testid="stMarkdownContainer"],
+.st-key-search_kpi_2 summary [data-testid="stMarkdownContainer"],
+.st-key-search_kpi_3 summary [data-testid="stMarkdownContainer"] {position:relative!important;}
+.st-key-search_kpi_0 summary p:nth-child(2),
+.st-key-search_kpi_1 summary p:nth-child(2),
+.st-key-search_kpi_2 summary p:nth-child(2),
+.st-key-search_kpi_3 summary p:nth-child(3) {
+    position:absolute!important;right:0!important;bottom:28px!important;
+    width:100%!important;margin:0!important;font-size:32px!important;
+    font-weight:850!important;line-height:1.15!important;color:#172B4D!important;
+    text-align:right!important;white-space:nowrap!important;
+}
+.st-key-search_kpi_0 summary p:last-child,
+.st-key-search_kpi_1 summary p:last-child,
+.st-key-search_kpi_2 summary p:last-child,
+.st-key-search_kpi_3 summary p:last-child {
+    position:absolute!important;right:0!important;bottom:0!important;
+    width:100%!important;margin:0!important;padding-right:18px!important;
+    font-size:12px!important;font-weight:400!important;line-height:1.3!important;
+    color:#8194AA!important;text-align:right!important;
+}
+.st-key-search_kpi_3 summary p:nth-child(2) {
+    position:absolute!important;right:0!important;bottom:70px!important;
+    width:100%!important;margin:0!important;font-size:13px!important;
+    font-weight:550!important;line-height:1.2!important;color:#526781!important;
+    text-align:right!important;white-space:normal!important;
+    display:-webkit-box!important;-webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;overflow:hidden!important;
+    overflow-wrap:anywhere!important;
+}
+
 /* Sidebar groups and in-page section links */
 section[data-testid="stSidebar"] .st-key-sidebar_active_group {background:#E9E4FF!important;border-radius:10px;padding:5px 6px 9px;border-left:3px solid #6749DD;}
 section[data-testid="stSidebar"] .st-key-sidebar_active_group div.stButton>button[kind="primary"] {background:#DED6FF!important;}
@@ -676,10 +710,10 @@ elif st.session_state.menu == "상품 검색 / 비교":
                     with col:
                         with st.container(key=f"search_kpi_{i}"):
                             # 전체 요약 카드 헤더를 클릭하면 해당 카드 바로 아래 상세 내역이 펼쳐집니다.
-                            card_label = f"**{label}**\n\n**{value}**\n\n"
+                            card_label = f"**{label}**\n\n"
                             if product_name:
                                 card_label += f"{product_name}\n\n"
-                            card_label += sub
+                            card_label += f"**{value}**\n\n{sub}"
                             with st.expander(card_label, expanded=False):
                                 if i == 0:
                                     st.caption(f"검색된 상품명 {len(summary):,}종")
