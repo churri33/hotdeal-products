@@ -440,7 +440,7 @@ NAV_SECTIONS = {
         ("상품 랭킹 (매출액)", "product-sales"),
         ("상품 랭킹 (판매건수)", "product-count"),
     ],
-    "상품 검색 / 비교": [("상품 검색", "product-search"), ("상품별 실적 비교", "search-summary"), ("상품별 매출 비교", "search-chart"), ("상세 편성 이력", "search-history")],
+    "상품 검색": [],
     "홈쇼핑사별 분석": [
         ("홈쇼핑사 종합실적", "partner-summary"), ("역대 효자 상품", "partner-top"),
         ("주차별 매출 흐름", "partner-trend"), ("전체 딜 진행 히스토리", "partner-history"),
@@ -452,7 +452,7 @@ for label, sections in NAV_SECTIONS.items():
         st.button(label, key=f"nav_{label}", use_container_width=True,
                   type="primary" if active else "secondary",
                   on_click=lambda value=label: st.session_state.update(menu=value))
-        if active:
+        if active and sections:
             links = "".join(f'<a href="#{slug}">{html.escape(title)}</a>' for title, slug in sections)
             st.markdown(f'<nav class="sidebar-subnav">{links}</nav>', unsafe_allow_html=True)
 
@@ -617,9 +617,9 @@ if st.session_state.menu == "실적 대시보드":
                     make_styled_table(table, highlight)
                     st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
-elif st.session_state.menu == "상품 검색 / 비교":
+elif st.session_state.menu == "상품 검색":
     section_anchor("product-search")
-    st.title("🔎 상품 검색 / 비교")
+    st.title("🔎 상품 검색")
     st.markdown('<div class="section-caption">상품별 편성 이력과 누적·최고 회차 매출을 비교합니다.</div>', unsafe_allow_html=True)
     if df.empty or "상품명" not in df.columns:
         st.warning("상품 데이터를 불러오지 못했습니다.")
@@ -658,7 +658,7 @@ elif st.session_state.menu == "상품 검색 / 비교":
             search_kw = ""
             chosen_name = None
         if not search_kw.strip():
-            st.info("상품명 키워드를 입력하면 상품별 실적 비교, 매출 그래프, 편성 이력이 나타납니다.")
+            st.info("상품명 키워드를 입력하면 상품별 실적 비교 결과가 나타납니다.")
         else:
             if chosen_name:
                 result = df[df["상품명"].astype(str).eq(chosen_name)].copy()
@@ -769,39 +769,6 @@ elif st.session_state.menu == "상품 검색 / 비교":
                     excel_button(shown, "상품별_실적_비교.xlsx", "상품별 실적 비교", "download_search_summary", inline=True)
                 st.dataframe(shown, use_container_width=True, hide_index=True, height=min(440, 40 + 36 * len(shown)))
 
-                st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
-                section_anchor("search-chart")
-                st.markdown('<div class="ranking-heading">② 상품별 매출 비교</div>', unsafe_allow_html=True)
-                chart_limit = min(len(summary), 15)
-                if len(summary) > chart_limit:
-                    st.caption(f"누적 매출액 상위 {chart_limit}개 상품을 표시합니다. 전체 결과는 위 표에서 확인할 수 있습니다.")
-                chart_data = summary.head(chart_limit).melt(id_vars="상품명", value_vars=["누적매출액", "최고회차매출"], var_name="매출구분", value_name="매출액")
-                chart_data["매출구분"] = chart_data["매출구분"].replace({"누적매출액":"누적 매출액", "최고회차매출":"최고 회차 매출"})
-                chart_data["매출액(억원)"] = chart_data["매출액"] / 100_000_000
-                fig = px.bar(chart_data, x="상품명", y="매출액(억원)", color="매출구분", barmode="group", color_discrete_map={"누적 매출액":"#3518C9", "최고 회차 매출":"#16A085"}, hover_data={"매출액":":,.0f", "매출액(억원)":":.2f"})
-                fig.update_layout(margin=dict(l=5, r=5, t=18, b=8), legend_title_text="", xaxis_title="", yaxis_title="매출액 (억원)", height=370)
-                st.plotly_chart(fig, use_container_width=True)
-
-                st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-                section_anchor("search-history")
-                heading, download = st.columns([16, 1], vertical_alignment="center")
-                with heading:
-                    st.markdown('<div class="ranking-heading">③ 상세 편성 이력</div>', unsafe_allow_html=True)
-                history = result.sort_values("_date_dt", ascending=False, na_position="last").copy()
-                history_table = pd.DataFrame({
-                    "판매날짜": history["_sales_period"],
-                    "운영주차": history["주차"] if "주차" in history else "-",
-                    "상품명": history["상품명"],
-                    "홈쇼핑사": history["홈쇼핑사"] if "홈쇼핑사" in history else "-",
-                    "매출액": history["총매출액"],
-                    "판매건수": history["판매건수"],
-                })
-                with download:
-                    excel_button(history_table, "상품별_상세_편성_이력.xlsx", "상세 편성 이력", "download_search_history", inline=True)
-                display_history = history_table.copy()
-                display_history["매출액"] = display_history["매출액"].map(lambda x: f"{format_eok(x)} ({format_won(x)})")
-                display_history["판매건수"] = display_history["판매건수"].map(format_count)
-                st.dataframe(display_history, use_container_width=True, hide_index=True, height=min(470, 40 + 36 * len(display_history)))
 
 elif st.session_state.menu == "홈쇼핑사별 분석":
     section_anchor("partner-summary")
