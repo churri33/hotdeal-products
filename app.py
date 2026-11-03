@@ -77,8 +77,18 @@ div[data-testid="stDownloadButton"] button p {font-size:19px!important;line-heig
 .weekly-ranking-table tbody td.weekly-products {font-size:15px!important;}
 .weekly-ranking-table tbody td.weekly-blue {color:#3518C9!important;font-weight:800!important;}
 
-/* Product search: taller input and clickable expanding KPI tiles */
-.st-key-product_search_input [data-testid="stTextInput"] input {min-height:52px!important;height:52px!important;font-size:17px!important;}
+/* Product search autocomplete: 50% width via column; taller input and left-aligned suggestions */
+.st-key-product_search_input input,
+.st-key-product_search_input [role="combobox"],
+.st-key-product_search_input [data-baseweb="input"] input {
+    min-height: 56px!important;height:56px!important;font-size:17px!important;
+    text-align:left!important;
+}
+.st-key-product_search_input [data-baseweb="select"]>div {min-height:56px!important;}
+.st-key-product_search_input [role="listbox"],
+[role="listbox"] [role="option"],
+[data-baseweb="popover"] [role="option"] {text-align:left!important;justify-content:flex-start!important;}
+/* KPI cards: preserve original neutral background, label, value, and subdued description */
 .st-key-search_kpi_0 [data-testid="stExpander"],
 .st-key-search_kpi_1 [data-testid="stExpander"],
 .st-key-search_kpi_2 [data-testid="stExpander"],
@@ -86,19 +96,23 @@ div[data-testid="stDownloadButton"] button p {font-size:19px!important;line-heig
 .st-key-search_kpi_0 [data-testid="stExpander"] summary,
 .st-key-search_kpi_1 [data-testid="stExpander"] summary,
 .st-key-search_kpi_2 [data-testid="stExpander"] summary,
-.st-key-search_kpi_3 [data-testid="stExpander"] summary {padding:15px 12px!important;min-height:108px!important;align-items:flex-start!important;}
+.st-key-search_kpi_3 [data-testid="stExpander"] summary {padding:19px 14px 17px!important;min-height:137px!important;align-items:flex-start!important;}
 .st-key-search_kpi_0 [data-testid="stExpander"] summary p,
 .st-key-search_kpi_1 [data-testid="stExpander"] summary p,
 .st-key-search_kpi_2 [data-testid="stExpander"] summary p,
-.st-key-search_kpi_3 [data-testid="stExpander"] summary p {font-size:16px!important;font-weight:750!important;line-height:1.65!important;color:#253449!important;white-space:pre-line!important;}
-.st-key-search_kpi_0 [data-testid="stExpanderDetails"],
-.st-key-search_kpi_1 [data-testid="stExpanderDetails"],
-.st-key-search_kpi_2 [data-testid="stExpanderDetails"],
-.st-key-search_kpi_3 [data-testid="stExpanderDetails"] {padding:4px 12px 14px!important;}
-/* Inline autocomplete results, visible as soon as the keyword is entered */
-.st-key-product_suggestion_list {border:1px solid #DDD6FE;border-radius:10px;background:#fff;padding:4px 5px;max-height:330px;overflow-y:auto;box-shadow:0 6px 18px rgba(53,24,201,.08);}
-.st-key-product_suggestion_list div.stButton>button {width:100%!important;justify-content:flex-start!important;text-align:left!important;border:0!important;border-radius:6px!important;background:#fff!important;min-height:31px!important;padding:5px 9px!important;color:#302A4A!important;}
-.st-key-product_suggestion_list div.stButton>button:hover {background:#F0ECFF!important;color:#3518C9!important;}
+.st-key-search_kpi_3 [data-testid="stExpander"] summary p {white-space:normal!important;line-height:1.35!important;margin:0 0 9px!important;}
+.st-key-search_kpi_0 [data-testid="stExpander"] summary p:first-child,
+.st-key-search_kpi_1 [data-testid="stExpander"] summary p:first-child,
+.st-key-search_kpi_2 [data-testid="stExpander"] summary p:first-child,
+.st-key-search_kpi_3 [data-testid="stExpander"] summary p:first-child {font-size:16px!important;color:#536276!important;font-weight:750!important;}
+.st-key-search_kpi_0 [data-testid="stExpander"] summary p:nth-child(2),
+.st-key-search_kpi_1 [data-testid="stExpander"] summary p:nth-child(2),
+.st-key-search_kpi_2 [data-testid="stExpander"] summary p:nth-child(2),
+.st-key-search_kpi_3 [data-testid="stExpander"] summary p:nth-child(2) {font-size:25px!important;color:#202D40!important;font-weight:850!important;text-align:right!important;overflow-wrap:anywhere;}
+.st-key-search_kpi_0 [data-testid="stExpander"] summary p:last-child,
+.st-key-search_kpi_1 [data-testid="stExpander"] summary p:last-child,
+.st-key-search_kpi_2 [data-testid="stExpander"] summary p:last-child,
+.st-key-search_kpi_3 [data-testid="stExpander"] summary p:last-child {font-size:12px!important;color:#8994A3!important;font-weight:400!important;text-align:right!important;}
 /* Sidebar groups and in-page section links */
 section[data-testid="stSidebar"] .st-key-sidebar_active_group {background:#E9E4FF!important;border-radius:10px;padding:5px 6px 9px;border-left:3px solid #6749DD;}
 section[data-testid="stSidebar"] .st-key-sidebar_active_group div.stButton>button[kind="primary"] {background:#DED6FF!important;}
@@ -545,40 +559,38 @@ elif st.session_state.menu == "상품 검색 / 비교":
         st.warning("상품 데이터를 불러오지 못했습니다.")
     else:
         st.markdown("### 상품명 키워드 검색")
+        # 전용 검색 컴포넌트: 입력창과 후보 목록이 하나의 자동완성 UI로 동작합니다.
+        from streamlit_searchbox import st_searchbox
+        all_product_names = sorted(df["상품명"].dropna().astype(str).unique(), key=str.casefold)
+
+        def suggest_products(searchterm: str):
+            term = (searchterm or "").strip()
+            if not term:
+                return []
+            matches = [name for name in all_product_names if term.casefold() in name.casefold()]
+            # 전체 키워드 검색을 첫 번째 선택지로 제공하고, 실제 상품명은 그 아래 표시
+            return [f"🔎 '{term}' 전체 검색"] + matches[:30]
+
         search_col, _search_space = st.columns([1, 1], gap="medium")
         with search_col:
             with st.container(key="product_search_input"):
-                search_kw = st.text_input("상품명 키워드 검색", placeholder="예: 김치, 갈비, 사과", label_visibility="collapsed", key="product_keyword")
-            # 입력한 키워드가 포함된 실제 상품명만 자동완성 후보로 표시합니다.
-            keyword = search_kw.strip()
-            matched_names = (
-                sorted(df.loc[df["상품명"].astype(str).str.contains(keyword, case=False, na=False, regex=False), "상품명"]
-                       .dropna().astype(str).unique(), key=str.casefold)
-                if keyword else []
-            )
-            # Streamlit selectbox는 기본적으로 닫혀 있으므로,
-            # 입력 직후 보이는 버튼 목록을 자동완성 후보로 사용합니다.
-            if st.session_state.get("suggestion_keyword") != keyword:
-                st.session_state["suggestion_keyword"] = keyword
-                st.session_state["selected_suggestion"] = None
-            chosen_name = st.session_state.get("selected_suggestion")
-            if matched_names:
-                if chosen_name:
-                    st.caption(f"선택된 상품: {chosen_name}")
-                    if st.button("↩ 키워드 전체 결과 보기", key="clear_product_suggestion"):
-                        st.session_state["selected_suggestion"] = None
-                        st.rerun()
-                else:
-                    st.caption(f"검색된 상품 {len(matched_names):,}종 · 아래 상품명을 클릭하면 해당 상품만 조회됩니다.")
-                    with st.container(key="product_suggestion_list"):
-                        for i, product_name in enumerate(matched_names[:10]):
-                            if st.button(product_name, key=f"suggestion_item_{i}", use_container_width=True):
-                                st.session_state["selected_suggestion"] = product_name
-                                st.rerun()
-                        if len(matched_names) > 10:
-                            st.caption(f"외 {len(matched_names)-10:,}종 · 키워드를 더 입력해 좁혀 주세요.")
-            elif keyword:
-                st.caption("일치하는 상품명이 없습니다.")
+                picked = st_searchbox(
+                    suggest_products,
+                    placeholder="상품명을 입력하세요. 예: 김치, 갈비, 사과",
+                    key="product_search_autocomplete",
+                    clear_on_submit=False,
+                    rerun_on_update=False,
+                )
+        # 검색어 선택 전에는 결과를 보여주지 않습니다. 입력 도중 후보는 자동으로 펼쳐집니다.
+        if picked and picked.startswith("🔎 '") and picked.endswith("' 전체 검색"):
+            search_kw = picked[len("🔎 '"):-len("' 전체 검색")]
+            chosen_name = None
+        elif picked:
+            search_kw = picked
+            chosen_name = picked
+        else:
+            search_kw = ""
+            chosen_name = None
         with st.expander("검색 조건 설정 (선택)", expanded=False):
             f1, f2, f3 = st.columns(3)
             with f1:
@@ -641,14 +653,14 @@ elif st.session_state.menu == "상품 검색 / 비교":
                     ("키워드 검색 결과", f"{len(summary):,}종", "키워드 포함 상품명 기준"),
                     ("총 편성 횟수", f"{len(result):,}건", "키워드 포함 상품 총 편성 건수"),
                     ("누적 매출액", format_eok(total_sales), format_won(total_sales)),
-                    ("최고 매출", format_eok(highest_sales), format_won(highest_sales)),
+                    ("최고 매출", f"{format_eok(highest_sales)} ({result.sort_values(['총매출액', '_date_dt'], ascending=[False, False], na_position='last').iloc[0]['상품명']})", "단일 상품 최고 매출 (1주 기준)"),
                 ]
                 cols = st.columns(4, gap="small")
                 for i, (col, (label, value, sub)) in enumerate(zip(cols, kpis)):
                     with col:
                         with st.container(key=f"search_kpi_{i}"):
                             # 전체 요약 카드 헤더를 클릭하면 해당 카드 바로 아래 상세 내역이 펼쳐집니다.
-                            with st.expander(f"{label}\n\n{value}\n{sub}", expanded=False):
+                            with st.expander(f"**{label}**\n\n**{value}**\n\n{sub}", expanded=False):
                                 if i == 0:
                                     st.caption(f"검색된 상품명 {len(summary):,}종")
                                     st.dataframe(summary[["상품명"]], hide_index=True, use_container_width=True,
