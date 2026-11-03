@@ -77,6 +77,28 @@ div[data-testid="stDownloadButton"] button p {font-size:19px!important;line-heig
 .weekly-ranking-table tbody td.weekly-products {font-size:15px!important;}
 .weekly-ranking-table tbody td.weekly-blue {color:#3518C9!important;font-weight:800!important;}
 
+/* Product search: taller input and clickable expanding KPI tiles */
+.st-key-product_search_input [data-testid="stTextInput"] input {min-height:52px!important;height:52px!important;font-size:17px!important;}
+.st-key-search_kpi_0 [data-testid="stExpander"],
+.st-key-search_kpi_1 [data-testid="stExpander"],
+.st-key-search_kpi_2 [data-testid="stExpander"],
+.st-key-search_kpi_3 [data-testid="stExpander"] {background:#F1F3F7!important;border:1px solid #E3E7ED!important;border-radius:10px!important;overflow:hidden;}
+.st-key-search_kpi_0 [data-testid="stExpander"] summary,
+.st-key-search_kpi_1 [data-testid="stExpander"] summary,
+.st-key-search_kpi_2 [data-testid="stExpander"] summary,
+.st-key-search_kpi_3 [data-testid="stExpander"] summary {padding:15px 12px!important;min-height:108px!important;align-items:flex-start!important;}
+.st-key-search_kpi_0 [data-testid="stExpander"] summary p,
+.st-key-search_kpi_1 [data-testid="stExpander"] summary p,
+.st-key-search_kpi_2 [data-testid="stExpander"] summary p,
+.st-key-search_kpi_3 [data-testid="stExpander"] summary p {font-size:16px!important;font-weight:750!important;line-height:1.65!important;color:#253449!important;white-space:pre-line!important;}
+.st-key-search_kpi_0 [data-testid="stExpanderDetails"],
+.st-key-search_kpi_1 [data-testid="stExpanderDetails"],
+.st-key-search_kpi_2 [data-testid="stExpanderDetails"],
+.st-key-search_kpi_3 [data-testid="stExpanderDetails"] {padding:4px 12px 14px!important;}
+/* Inline autocomplete results, visible as soon as the keyword is entered */
+.st-key-product_suggestion_list {border:1px solid #DDD6FE;border-radius:10px;background:#fff;padding:4px 5px;max-height:330px;overflow-y:auto;box-shadow:0 6px 18px rgba(53,24,201,.08);}
+.st-key-product_suggestion_list div.stButton>button {width:100%!important;justify-content:flex-start!important;text-align:left!important;border:0!important;border-radius:6px!important;background:#fff!important;min-height:31px!important;padding:5px 9px!important;color:#302A4A!important;}
+.st-key-product_suggestion_list div.stButton>button:hover {background:#F0ECFF!important;color:#3518C9!important;}
 /* Sidebar groups and in-page section links */
 section[data-testid="stSidebar"] .st-key-sidebar_active_group {background:#E9E4FF!important;border-radius:10px;padding:5px 6px 9px;border-left:3px solid #6749DD;}
 section[data-testid="stSidebar"] .st-key-sidebar_active_group div.stButton>button[kind="primary"] {background:#DED6FF!important;}
@@ -525,7 +547,8 @@ elif st.session_state.menu == "상품 검색 / 비교":
         st.markdown("### 상품명 키워드 검색")
         search_col, _search_space = st.columns([1, 1], gap="medium")
         with search_col:
-            search_kw = st.text_input("상품명 키워드 검색", placeholder="예: 김치, 갈비, 사과", label_visibility="collapsed", key="product_keyword")
+            with st.container(key="product_search_input"):
+                search_kw = st.text_input("상품명 키워드 검색", placeholder="예: 김치, 갈비, 사과", label_visibility="collapsed", key="product_keyword")
             # 입력한 키워드가 포함된 실제 상품명만 자동완성 후보로 표시합니다.
             keyword = search_kw.strip()
             matched_names = (
@@ -533,14 +556,27 @@ elif st.session_state.menu == "상품 검색 / 비교":
                        .dropna().astype(str).unique(), key=str.casefold)
                 if keyword else []
             )
-            chosen_name = None
+            # Streamlit selectbox는 기본적으로 닫혀 있으므로,
+            # 입력 직후 보이는 버튼 목록을 자동완성 후보로 사용합니다.
+            if st.session_state.get("suggestion_keyword") != keyword:
+                st.session_state["suggestion_keyword"] = keyword
+                st.session_state["selected_suggestion"] = None
+            chosen_name = st.session_state.get("selected_suggestion")
             if matched_names:
-                options = ["전체 검색 결과 보기"] + matched_names
-                chosen_name = st.selectbox(
-                    "검색된 상품명 선택 (자동완성)", options, index=0,
-                    key=f"product_suggestion_{keyword}",
-                    help="상품명을 선택하면 해당 상품의 실적만 확인할 수 있습니다."
-                )
+                if chosen_name:
+                    st.caption(f"선택된 상품: {chosen_name}")
+                    if st.button("↩ 키워드 전체 결과 보기", key="clear_product_suggestion"):
+                        st.session_state["selected_suggestion"] = None
+                        st.rerun()
+                else:
+                    st.caption(f"검색된 상품 {len(matched_names):,}종 · 아래 상품명을 클릭하면 해당 상품만 조회됩니다.")
+                    with st.container(key="product_suggestion_list"):
+                        for i, product_name in enumerate(matched_names[:10]):
+                            if st.button(product_name, key=f"suggestion_item_{i}", use_container_width=True):
+                                st.session_state["selected_suggestion"] = product_name
+                                st.rerun()
+                        if len(matched_names) > 10:
+                            st.caption(f"외 {len(matched_names)-10:,}종 · 키워드를 더 입력해 좁혀 주세요.")
             elif keyword:
                 st.caption("일치하는 상품명이 없습니다.")
         with st.expander("검색 조건 설정 (선택)", expanded=False):
@@ -558,7 +594,7 @@ elif st.session_state.menu == "상품 검색 / 비교":
         if not search_kw.strip():
             st.info("상품명 키워드를 입력하면 상품별 실적 비교, 매출 그래프, 편성 이력이 나타납니다.")
         else:
-            if chosen_name and chosen_name != "전체 검색 결과 보기":
+            if chosen_name:
                 result = df[df["상품명"].astype(str).eq(chosen_name)].copy()
             else:
                 result = df[df["상품명"].astype(str).str.contains(search_kw.strip(), case=False, na=False, regex=False)].copy()
@@ -598,16 +634,47 @@ elif st.session_state.menu == "상품 검색 / 비교":
                     summary["최고매출 홈쇼핑사"] = "-"
                 summary = summary.sort_values(["누적매출액", "최고회차매출", "상품명"], ascending=[False, False, True]).reset_index(drop=True)
 
+                # KPI 수치는 현재 키워드 및 선택 필터가 적용된 결과를 기준으로 계산합니다.
+                total_sales = result["총매출액"].sum()
+                highest_sales = result["총매출액"].max()
                 kpis = [
-                    ("검색 상품 종류", f"{len(summary):,}종", "동일 상품명 기준"),
-                    ("총 편성 건수", f"{len(result):,}건", "검색된 데이터 행 수"),
-                    ("누적 매출액", format_eok(result["총매출액"].sum()), format_won(result["총매출액"].sum())),
-                    ("최고 회차 매출", format_eok(result["총매출액"].max()), format_won(result["총매출액"].max())),
+                    ("키워드 검색 결과", f"{len(summary):,}종", "키워드 포함 상품명 기준"),
+                    ("총 편성 횟수", f"{len(result):,}건", "키워드 포함 상품 총 편성 건수"),
+                    ("누적 매출액", format_eok(total_sales), format_won(total_sales)),
+                    ("최고 매출", format_eok(highest_sales), format_won(highest_sales)),
                 ]
                 cols = st.columns(4, gap="small")
-                for col, (label, value, sub) in zip(cols, kpis):
+                for i, (col, (label, value, sub)) in enumerate(zip(cols, kpis)):
                     with col:
-                        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{html.escape(label)}</div><div class="kpi-value">{format_kpi_value(value)}</div><div class="kpi-sub">{html.escape(sub)}</div></div>', unsafe_allow_html=True)
+                        with st.container(key=f"search_kpi_{i}"):
+                            # 전체 요약 카드 헤더를 클릭하면 해당 카드 바로 아래 상세 내역이 펼쳐집니다.
+                            with st.expander(f"{label}\n\n{value}\n{sub}", expanded=False):
+                                if i == 0:
+                                    st.caption(f"검색된 상품명 {len(summary):,}종")
+                                    st.dataframe(summary[["상품명"]], hide_index=True, use_container_width=True,
+                                                 height=min(300, 38 + len(summary) * 35))
+                                elif i == 1:
+                                    st.caption("상품별 편성 횟수")
+                                    details = summary[["상품명", "편성횟수", "최근편성일"]].copy()
+                                    details["최근편성일"] = pd.to_datetime(details["최근편성일"], errors="coerce").dt.strftime("%y.%m.%d").fillna("-")
+                                    st.dataframe(details, hide_index=True, use_container_width=True,
+                                                 height=min(300, 38 + len(details) * 35))
+                                elif i == 2:
+                                    st.markdown(f"**정확한 누적 매출: {format_won(total_sales)}**")
+                                    details = summary[["상품명", "누적매출액"]].copy()
+                                    details["누적매출액"] = details["누적매출액"].map(format_won)
+                                    st.dataframe(details, hide_index=True, use_container_width=True,
+                                                 height=min(300, 38 + len(details) * 35))
+                                else:
+                                    best = result.sort_values(["총매출액", "_date_dt"], ascending=[False, False], na_position="last").iloc[0]
+                                    st.markdown(f"**정확한 최고 매출: {format_won(highest_sales)}**")
+                                    st.write(f"상품명: {best['상품명']}")
+                                    if "주차" in result.columns:
+                                        st.write(f"운영주차: {best['주차']}")
+                                    st.write(f"판매날짜: {best['_sales_period']}")
+                                    if "홈쇼핑사" in result.columns:
+                                        st.write(f"홈쇼핑사: {best['홈쇼핑사']}")
+                                    st.caption("단일 상품·1주 편성 행 기준 최고 매출")
 
                 st.markdown("<div style='height:22px'></div>", unsafe_allow_html=True)
                 section_anchor("search-summary")
