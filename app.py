@@ -88,31 +88,63 @@ div[data-testid="stDownloadButton"] button p {font-size:19px!important;line-heig
 .st-key-product_search_input [role="listbox"],
 [role="listbox"] [role="option"],
 [data-baseweb="popover"] [role="option"] {text-align:left!important;justify-content:flex-start!important;}
-/* KPI cards: preserve original neutral background, label, value, and subdued description */
+/* Product search KPI: four equal-height pale blue cards, right-aligned values. */
 .st-key-search_kpi_0 [data-testid="stExpander"],
 .st-key-search_kpi_1 [data-testid="stExpander"],
 .st-key-search_kpi_2 [data-testid="stExpander"],
-.st-key-search_kpi_3 [data-testid="stExpander"] {background:#F1F3F7!important;border:1px solid #E3E7ED!important;border-radius:10px!important;overflow:hidden;}
+.st-key-search_kpi_3 [data-testid="stExpander"] {
+    background:#F0F8FF!important;border:1px solid #DCECF9!important;
+    border-radius:12px!important;overflow:hidden;
+}
 .st-key-search_kpi_0 [data-testid="stExpander"] summary,
 .st-key-search_kpi_1 [data-testid="stExpander"] summary,
 .st-key-search_kpi_2 [data-testid="stExpander"] summary,
-.st-key-search_kpi_3 [data-testid="stExpander"] summary {padding:19px 14px 17px!important;min-height:137px!important;align-items:flex-start!important;}
-.st-key-search_kpi_0 [data-testid="stExpander"] summary p,
-.st-key-search_kpi_1 [data-testid="stExpander"] summary p,
-.st-key-search_kpi_2 [data-testid="stExpander"] summary p,
-.st-key-search_kpi_3 [data-testid="stExpander"] summary p {white-space:normal!important;line-height:1.35!important;margin:0 0 9px!important;}
-.st-key-search_kpi_0 [data-testid="stExpander"] summary p:first-child,
-.st-key-search_kpi_1 [data-testid="stExpander"] summary p:first-child,
-.st-key-search_kpi_2 [data-testid="stExpander"] summary p:first-child,
-.st-key-search_kpi_3 [data-testid="stExpander"] summary p:first-child {font-size:16px!important;color:#536276!important;font-weight:750!important;}
-.st-key-search_kpi_0 [data-testid="stExpander"] summary p:nth-child(2),
-.st-key-search_kpi_1 [data-testid="stExpander"] summary p:nth-child(2),
-.st-key-search_kpi_2 [data-testid="stExpander"] summary p:nth-child(2),
-.st-key-search_kpi_3 [data-testid="stExpander"] summary p:nth-child(2) {font-size:25px!important;color:#202D40!important;font-weight:850!important;text-align:right!important;overflow-wrap:anywhere;}
-.st-key-search_kpi_0 [data-testid="stExpander"] summary p:last-child,
-.st-key-search_kpi_1 [data-testid="stExpander"] summary p:last-child,
-.st-key-search_kpi_2 [data-testid="stExpander"] summary p:last-child,
-.st-key-search_kpi_3 [data-testid="stExpander"] summary p:last-child {font-size:12px!important;color:#8994A3!important;font-weight:400!important;text-align:right!important;}
+.st-key-search_kpi_3 [data-testid="stExpander"] summary {
+    min-height:172px!important;height:172px!important;box-sizing:border-box!important;
+    padding:17px 17px 15px!important;position:relative!important;display:block!important;
+}
+/* Streamlit places the native expander chevron first; pin it bottom-right. */
+.st-key-search_kpi_0 summary svg,.st-key-search_kpi_1 summary svg,
+.st-key-search_kpi_2 summary svg,.st-key-search_kpi_3 summary svg {
+    position:absolute!important;right:13px!important;bottom:13px!important;
+    width:16px!important;height:16px!important;color:#8194AA!important;
+}
+.st-key-search_kpi_0 summary [data-testid="stMarkdownContainer"],
+.st-key-search_kpi_1 summary [data-testid="stMarkdownContainer"],
+.st-key-search_kpi_2 summary [data-testid="stMarkdownContainer"],
+.st-key-search_kpi_3 summary [data-testid="stMarkdownContainer"] {
+    width:100%!important;display:flex!important;flex-direction:column!important;
+    height:139px!important;min-width:0!important;
+}
+.st-key-search_kpi_0 summary p,.st-key-search_kpi_1 summary p,
+.st-key-search_kpi_2 summary p,.st-key-search_kpi_3 summary p {
+    margin:0!important;line-height:1.25!important;min-width:0!important;
+}
+.st-key-search_kpi_0 summary p:first-child,.st-key-search_kpi_1 summary p:first-child,
+.st-key-search_kpi_2 summary p:first-child,.st-key-search_kpi_3 summary p:first-child {
+    font-size:15px!important;font-weight:750!important;color:#526781!important;
+    text-align:left!important;
+}
+.st-key-search_kpi_0 summary p:nth-child(2),.st-key-search_kpi_1 summary p:nth-child(2),
+.st-key-search_kpi_2 summary p:nth-child(2),.st-key-search_kpi_3 summary p:nth-child(2) {
+    margin-top:auto!important;font-size:32px!important;font-weight:850!important;
+    color:#172B4D!important;text-align:right!important;letter-spacing:-.5px!important;
+    white-space:nowrap!important;
+}
+.st-key-search_kpi_0 summary p:last-child,.st-key-search_kpi_1 summary p:last-child,
+.st-key-search_kpi_2 summary p:last-child,.st-key-search_kpi_3 summary p:last-child {
+    font-size:12px!important;font-weight:400!important;color:#8194AA!important;
+    text-align:right!important;padding-right:18px!important;margin-top:9px!important;
+}
+/* Long product name belongs on a separate line, without increasing collapsed card height. */
+.st-key-search_kpi_3 summary p:nth-child(3) {
+    font-size:13px!important;font-weight:550!important;color:#526781!important;
+    text-align:right!important;line-height:1.15!important;
+    display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;
+    overflow:hidden!important;overflow-wrap:anywhere!important;margin-top:4px!important;
+}
+.st-key-search_kpi_3 summary p:last-child {font-size:11px!important;margin-top:5px!important;}
+.st-key-search_kpi_3 summary p:nth-child(2) {margin-top:8px!important;}
 /* Sidebar groups and in-page section links */
 section[data-testid="stSidebar"] .st-key-sidebar_active_group {background:#E9E4FF!important;border-radius:10px;padding:5px 6px 9px;border-left:3px solid #6749DD;}
 section[data-testid="stSidebar"] .st-key-sidebar_active_group div.stButton>button[kind="primary"] {background:#DED6FF!important;}
@@ -591,18 +623,6 @@ elif st.session_state.menu == "상품 검색 / 비교":
         else:
             search_kw = ""
             chosen_name = None
-        with st.expander("검색 조건 설정 (선택)", expanded=False):
-            f1, f2, f3 = st.columns(3)
-            with f1:
-                all_weeks = sorted([w for w in df["주차"].unique() if w], key=week_sort_key) if "주차" in df else []
-                selected_weeks = st.multiselect("운영주차", all_weeks, default=[], placeholder="전체 주차")
-            with f2:
-                partners = sorted(v for v in df["홈쇼핑사"].unique() if v) if "홈쇼핑사" in df else []
-                selected_partners = st.multiselect("홈쇼핑사", partners, default=[], placeholder="전체 홈쇼핑사")
-            with f3:
-                categories = sorted(v for v in df["카테고리"].unique() if v) if "카테고리" in df else []
-                selected_categories = st.multiselect("카테고리", categories, default=[], placeholder="전체 카테고리")
-
         if not search_kw.strip():
             st.info("상품명 키워드를 입력하면 상품별 실적 비교, 매출 그래프, 편성 이력이 나타납니다.")
         else:
@@ -610,12 +630,6 @@ elif st.session_state.menu == "상품 검색 / 비교":
                 result = df[df["상품명"].astype(str).eq(chosen_name)].copy()
             else:
                 result = df[df["상품명"].astype(str).str.contains(search_kw.strip(), case=False, na=False, regex=False)].copy()
-            if selected_weeks and "주차" in result:
-                result = result[result["주차"].isin(selected_weeks)]
-            if selected_partners and "홈쇼핑사" in result:
-                result = result[result["홈쇼핑사"].isin(selected_partners)]
-            if selected_categories and "카테고리" in result:
-                result = result[result["카테고리"].isin(selected_categories)]
             if result.empty:
                 st.warning("검색 조건에 맞는 상품이 없습니다. 다른 키워드나 필터를 선택해 주세요.")
             else:
@@ -640,27 +654,33 @@ elif st.session_state.menu == "상품 검색 / 비교":
                              .drop_duplicates("상품명"))
                 best_rows = best_rows.set_index("상품명")
                 summary["최고매출일"] = summary["상품명"].map(best_rows["_sales_period"])
+                summary["최고매출편성주"] = summary["상품명"].map(best_rows["주차"]) if "주차" in result else "-"
                 if "홈쇼핑사" in result:
                     summary["최고매출 홈쇼핑사"] = summary["상품명"].map(best_rows["홈쇼핑사"])
                 else:
                     summary["최고매출 홈쇼핑사"] = "-"
-                summary = summary.sort_values(["누적매출액", "최고회차매출", "상품명"], ascending=[False, False, True]).reset_index(drop=True)
+                summary = summary.sort_values(["최고회차매출", "누적매출액", "상품명"], ascending=[False, False, True]).reset_index(drop=True)
 
                 # KPI 수치는 현재 키워드 및 선택 필터가 적용된 결과를 기준으로 계산합니다.
                 total_sales = result["총매출액"].sum()
                 highest_sales = result["총매출액"].max()
+                best_overall = result.sort_values(["총매출액", "_date_dt"], ascending=[False, False], na_position="last").iloc[0]
                 kpis = [
-                    ("키워드 검색 결과", f"{len(summary):,}종", "키워드 포함 상품명 기준"),
-                    ("총 편성 횟수", f"{len(result):,}건", "키워드 포함 상품 총 편성 건수"),
-                    ("누적 매출액", format_eok(total_sales), format_won(total_sales)),
-                    ("최고 매출", f"{format_eok(highest_sales)} ({result.sort_values(['총매출액', '_date_dt'], ascending=[False, False], na_position='last').iloc[0]['상품명']})", "단일 상품 최고 매출 (1주 기준)"),
+                    ("키워드 검색 결과", f"{len(summary):,}종", "키워드 포함 상품명 기준", None),
+                    ("총 편성 횟수", f"{len(result):,}건", "키워드 포함 상품 총 편성 건수", None),
+                    ("누적 매출액", format_eok(total_sales), format_won(total_sales), None),
+                    ("최고 매출", format_eok(highest_sales), "단일 상품 최고 매출 (1주 기준)", str(best_overall["상품명"])),
                 ]
                 cols = st.columns(4, gap="small")
-                for i, (col, (label, value, sub)) in enumerate(zip(cols, kpis)):
+                for i, (col, (label, value, sub, product_name)) in enumerate(zip(cols, kpis)):
                     with col:
                         with st.container(key=f"search_kpi_{i}"):
                             # 전체 요약 카드 헤더를 클릭하면 해당 카드 바로 아래 상세 내역이 펼쳐집니다.
-                            with st.expander(f"**{label}**\n\n**{value}**\n\n{sub}", expanded=False):
+                            card_label = f"**{label}**\n\n**{value}**\n\n"
+                            if product_name:
+                                card_label += f"{product_name}\n\n"
+                            card_label += sub
+                            with st.expander(card_label, expanded=False):
                                 if i == 0:
                                     st.caption(f"검색된 상품명 {len(summary):,}종")
                                     st.dataframe(summary[["상품명"]], hide_index=True, use_container_width=True,
@@ -693,20 +713,26 @@ elif st.session_state.menu == "상품 검색 / 비교":
                 heading, download = st.columns([16, 1], vertical_alignment="center")
                 with heading:
                     st.markdown('<div class="ranking-heading">① 상품별 실적 비교</div>', unsafe_allow_html=True)
-                export_summary = summary.copy()
-                export_summary["최근편성일"] = export_summary["최근편성일"].dt.strftime("%y.%m.%d").fillna("-")
-                export_summary = export_summary.rename(columns={"상품명":"상품명", "편성횟수":"편성횟수", "누적매출액":"누적매출액(원)", "최고회차매출":"최고회차매출(원)", "누적판매건수":"누적판매건수", "최고매출일":"최고매출일", "최고매출 홈쇼핑사":"최고매출 홈쇼핑사"})
-                with download:
-                    excel_button(export_summary, "상품별_실적_비교.xlsx", "상품별 실적 비교", "download_search_summary", inline=True)
+                def best_week_label(row):
+                    week = str(row["최고매출편성주"]).strip()
+                    if week and week != "-" and "주차" not in week:
+                        week = f"{week}주차" if week.isdigit() else week
+                    period = str(row["최고매출일"]).strip()
+                    if period and period != "-":
+                        # 판매기간의 (N일)은 주차 열에서 생략합니다.
+                        period = re.sub(r"\s*\(\d+일\)$", "", period)
+                        return f"{week} ({period})" if week and week != "-" else period
+                    return week or "-"
+
                 shown = pd.DataFrame({
                     "상품명": summary["상품명"],
-                    "편성횟수": summary["편성횟수"].map(lambda x: f"{x:,}회"),
+                    "최고 매출": summary["최고회차매출"].map(lambda x: f"{format_eok(x)} ({format_won(x)})"),
+                    "최고 매출 편성주": summary.apply(best_week_label, axis=1),
+                    "편성 횟수": summary["편성횟수"].map(lambda x: f"{x:,}회"),
                     "누적 매출액": summary["누적매출액"].map(lambda x: f"{format_eok(x)} ({format_won(x)})"),
-                    "최고 회차 매출": summary["최고회차매출"].map(lambda x: f"{format_eok(x)} ({format_won(x)})"),
-                    "최근 편성일": export_summary["최근편성일"],
-                    "최고매출일": summary["최고매출일"],
-                    "최고매출 홈쇼핑사": summary["최고매출 홈쇼핑사"],
                 })
+                with download:
+                    excel_button(shown, "상품별_실적_비교.xlsx", "상품별 실적 비교", "download_search_summary", inline=True)
                 st.dataframe(shown, use_container_width=True, hide_index=True, height=min(440, 40 + 36 * len(shown)))
 
                 st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
