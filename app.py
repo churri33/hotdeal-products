@@ -80,7 +80,7 @@ div[data-testid="stDownloadButton"] button p {font-size:19px!important;line-heig
 /* Sidebar groups and in-page section links */
 section[data-testid="stSidebar"] .st-key-sidebar_active_group {background:#E9E4FF!important;border-radius:10px;padding:5px 6px 9px;border-left:3px solid #6749DD;}
 section[data-testid="stSidebar"] .st-key-sidebar_active_group div.stButton>button[kind="primary"] {background:#DED6FF!important;}
-.sidebar-subnav {padding:1px 4px 19px 14px;display:flex;flex-direction:column;gap:2px;}
+.sidebar-subnav {padding:1px 4px 3px 14px;display:flex;flex-direction:column;gap:2px;}
 .sidebar-subnav a {display:block;color:#64718A!important;text-decoration:none!important;font-size:13px!important;font-weight:550;padding:7px 8px;border-radius:6px;line-height:1.35;}
 .sidebar-subnav a:hover {background:#DED6FF;color:#3518C9!important;}
 .section-anchor {display:block;position:relative;top:-18px;scroll-margin-top:45px;height:0;}
@@ -94,6 +94,9 @@ body:has(#weekly-ranking:target) section[data-testid="stSidebar"] a[href="#weekl
 body:has(#product-sales:target) section[data-testid="stSidebar"] a[href="#product-sales"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
 body:has(#product-count:target) section[data-testid="stSidebar"] a[href="#product-count"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
 body:has(#product-search:target) section[data-testid="stSidebar"] a[href="#product-search"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
+body:has(#search-summary:target) section[data-testid="stSidebar"] a[href="#search-summary"],
+body:has(#search-chart:target) section[data-testid="stSidebar"] a[href="#search-chart"],
+body:has(#search-history:target) section[data-testid="stSidebar"] a[href="#search-history"],
 body:has(#partner-summary:target) section[data-testid="stSidebar"] a[href="#partner-summary"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
 body:has(#partner-top:target) section[data-testid="stSidebar"] a[href="#partner-top"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
 body:has(#partner-trend:target) section[data-testid="stSidebar"] a[href="#partner-trend"] {background:#DED6FF!important;color:#3518C9!important;font-weight:800!important;}
@@ -335,7 +338,7 @@ NAV_SECTIONS = {
         ("상품 랭킹 (매출액)", "product-sales"),
         ("상품 랭킹 (판매건수)", "product-count"),
     ],
-    "상품 검색 / 비교": [("상품 검색 및 비교", "product-search")],
+    "상품 검색 / 비교": [("상품 검색", "product-search"), ("상품별 실적 비교", "search-summary"), ("상품별 매출 비교", "search-chart"), ("상세 편성 이력", "search-history")],
     "홈쇼핑사별 분석": [
         ("홈쇼핑사 종합실적", "partner-summary"), ("역대 효자 상품", "partner-top"),
         ("주차별 매출 흐름", "partner-trend"), ("전체 딜 진행 히스토리", "partner-history"),
@@ -463,7 +466,7 @@ if st.session_state.menu == "실적 대시보드":
             week_title, week_download = st.columns([12, 1], gap="small", vertical_alignment="center")
             with week_title:
                 section_anchor("weekly-ranking")
-                st.subheader("🥇 주간 랭킹")
+                st.subheader("🥇 주간 랭킹 (매출액)")
             if not week_table.empty:
                 with week_download:
                     excel_button(week_table, "주차_랭킹_TOP5.xlsx", "주차 랭킹 TOP5", "download_week_ranking", inline=True)
@@ -514,48 +517,130 @@ if st.session_state.menu == "실적 대시보드":
 
 elif st.session_state.menu == "상품 검색 / 비교":
     section_anchor("product-search")
-    st.title("🔍 상품 검색 / 비교")
-    st.caption("키워드, 가격대, 할인율, 카테고리 등 조건별로 상품을 검색하고 비교합니다.")
-    if df.empty:
-        st.warning("데이터를 불러오지 못했습니다.")
+    st.title("🔎 상품 검색 / 비교")
+    st.markdown('<div class="section-caption">상품별 편성 이력과 누적·최고 회차 매출을 비교합니다.</div>', unsafe_allow_html=True)
+    if df.empty or "상품명" not in df.columns:
+        st.warning("상품 데이터를 불러오지 못했습니다.")
     else:
-        f1, f2, f3 = st.columns(3)
-        with f1:
-            search_kw = st.text_input("상품명 키워드 검색", placeholder="예: 갈비, 코트, 에어프라이어")
-            cats = ["전체"] + sorted(v for v in df["카테고리"].unique() if v) if "카테고리" in df else ["전체"]
-            selected_cat = st.selectbox("카테고리 선택", cats)
-        with f2:
-            chans = ["전체"] + sorted(v for v in df["홈쇼핑사"].unique() if v) if "홈쇼핑사" in df else ["전체"]
-            selected_chan = st.selectbox("홈쇼핑사 선택", chans)
-            min_discount = st.slider("최소 할인율 (%)", 0, 100, 0, step=5)
-        with f3:
-            max_price = int(df["할인가"].max()) if "할인가" in df and df["할인가"].max() > 0 else 1_000_000
-            price_range = st.slider("할인가 범위 (원)", 0, max_price, (0, max_price), step=max(1, max_price // 200))
-        search_df = df.copy()
-        if search_kw and "상품명" in search_df:
-            search_df = search_df[search_df["상품명"].str.contains(search_kw, case=False, na=False, regex=False)]
-        if selected_cat != "전체" and "카테고리" in search_df:
-            search_df = search_df[search_df["카테고리"] == selected_cat]
-        if selected_chan != "전체" and "홈쇼핑사" in search_df:
-            search_df = search_df[search_df["홈쇼핑사"] == selected_chan]
-        if "할인율" in search_df:
-            search_df = search_df[search_df["할인율"] >= min_discount]
-        if "할인가" in search_df:
-            search_df = search_df[search_df["할인가"].between(*price_range)]
-        st.markdown("---")
-        c1, c2, c3 = st.columns(3)
-        count_unique = search_df["상품명"].loc[search_df["상품명"].ne("")].nunique() if "상품명" in search_df else 0
-        c1.metric("검색된 상품 종류", f"{count_unique:,}종")
-        c2.metric("검색 상품 총 매출액", format_won(search_df["총매출액"].sum()) if "총매출액" in search_df else "0원")
-        c3.metric("검색 상품 평균 할인가", format_won(search_df["할인가"].mean()) if len(search_df) and "할인가" in search_df else "0원")
-        st.caption(f"조건에 해당하는 데이터 행 수: {len(search_df):,}건")
-        display_df = search_df.drop(columns=["객단가"], errors="ignore").copy()
-        for col in ("총매출액", "할인가", "정가", "판매건수"):
-            if col in display_df:
-                display_df[col] = display_df[col].map(lambda x: f"{int(round(x)):,}" if pd.notna(x) else "")
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        excel_button(search_df.drop(columns=["객단가"], errors="ignore"), "상품_검색_결과.xlsx", "상품 검색 결과", "download_search")
-        st.dataframe(display_df, use_container_width=True, hide_index=True)
+        st.markdown("### 상품명 키워드 검색")
+        search_kw = st.text_input("상품명 키워드 검색", placeholder="예: 김치, 갈비, 사과", label_visibility="collapsed", key="product_keyword")
+        with st.expander("검색 조건 설정 (선택)", expanded=False):
+            f1, f2, f3 = st.columns(3)
+            with f1:
+                all_weeks = sorted([w for w in df["주차"].unique() if w], key=week_sort_key) if "주차" in df else []
+                selected_weeks = st.multiselect("운영주차", all_weeks, default=[], placeholder="전체 주차")
+            with f2:
+                partners = sorted(v for v in df["홈쇼핑사"].unique() if v) if "홈쇼핑사" in df else []
+                selected_partners = st.multiselect("홈쇼핑사", partners, default=[], placeholder="전체 홈쇼핑사")
+            with f3:
+                categories = sorted(v for v in df["카테고리"].unique() if v) if "카테고리" in df else []
+                selected_categories = st.multiselect("카테고리", categories, default=[], placeholder="전체 카테고리")
+
+        if not search_kw.strip():
+            st.info("상품명 키워드를 입력하면 상품별 실적 비교, 매출 그래프, 편성 이력이 나타납니다.")
+        else:
+            result = df[df["상품명"].str.contains(search_kw.strip(), case=False, na=False, regex=False)].copy()
+            if selected_weeks and "주차" in result:
+                result = result[result["주차"].isin(selected_weeks)]
+            if selected_partners and "홈쇼핑사" in result:
+                result = result[result["홈쇼핑사"].isin(selected_partners)]
+            if selected_categories and "카테고리" in result:
+                result = result[result["카테고리"].isin(selected_categories)]
+            if result.empty:
+                st.warning("검색 조건에 맞는 상품이 없습니다. 다른 키워드나 필터를 선택해 주세요.")
+            else:
+                for numeric in ("총매출액", "판매건수"):
+                    if numeric not in result:
+                        result[numeric] = 0
+                for field in ("_편성시작일", "_최종집계일"):
+                    if field not in result:
+                        result[field] = pd.NA
+                result["_start_dt"] = result["_편성시작일"].map(parse_sheet_date)
+                result["_end_dt"] = result["_최종집계일"].map(parse_sheet_date)
+                result["_date_dt"] = result["_start_dt"].combine_first(result["_end_dt"])
+                result["_sales_period"] = result.apply(lambda row: format_sales_period(pd.DataFrame([row])), axis=1)
+                grouped = result.groupby("상품명", sort=False)
+                summary = grouped.agg(
+                    편성횟수=("상품명", "size"), 누적매출액=("총매출액", "sum"),
+                    최고회차매출=("총매출액", "max"), 누적판매건수=("판매건수", "sum"),
+                    최근편성일=("_date_dt", "max"),
+                ).reset_index()
+                # 최고 매출액 동률 시 편성시작일이 가장 최근인 회차를 선택
+                best_rows = (result.sort_values(["총매출액", "_date_dt"], ascending=[False, False], na_position="last")
+                             .drop_duplicates("상품명"))
+                best_rows = best_rows.set_index("상품명")
+                summary["최고매출일"] = summary["상품명"].map(best_rows["_sales_period"])
+                if "홈쇼핑사" in result:
+                    summary["최고매출 홈쇼핑사"] = summary["상품명"].map(best_rows["홈쇼핑사"])
+                else:
+                    summary["최고매출 홈쇼핑사"] = "-"
+                summary = summary.sort_values(["누적매출액", "최고회차매출", "상품명"], ascending=[False, False, True]).reset_index(drop=True)
+
+                kpis = [
+                    ("검색 상품 종류", f"{len(summary):,}종", "동일 상품명 기준"),
+                    ("총 편성 건수", f"{len(result):,}건", "검색된 데이터 행 수"),
+                    ("누적 매출액", format_eok(result["총매출액"].sum()), format_won(result["총매출액"].sum())),
+                    ("최고 회차 매출", format_eok(result["총매출액"].max()), format_won(result["총매출액"].max())),
+                ]
+                cols = st.columns(4, gap="small")
+                for col, (label, value, sub) in zip(cols, kpis):
+                    with col:
+                        st.markdown(f'<div class="kpi-card"><div class="kpi-label">{html.escape(label)}</div><div class="kpi-value">{format_kpi_value(value)}</div><div class="kpi-sub">{html.escape(sub)}</div></div>', unsafe_allow_html=True)
+
+                st.markdown("<div style='height:22px'></div>", unsafe_allow_html=True)
+                section_anchor("search-summary")
+                heading, download = st.columns([16, 1], vertical_alignment="center")
+                with heading:
+                    st.markdown('<div class="ranking-heading">① 상품별 실적 비교</div>', unsafe_allow_html=True)
+                export_summary = summary.copy()
+                export_summary["최근편성일"] = export_summary["최근편성일"].dt.strftime("%y.%m.%d").fillna("-")
+                export_summary = export_summary.rename(columns={"상품명":"상품명", "편성횟수":"편성횟수", "누적매출액":"누적매출액(원)", "최고회차매출":"최고회차매출(원)", "누적판매건수":"누적판매건수", "최고매출일":"최고매출일", "최고매출 홈쇼핑사":"최고매출 홈쇼핑사"})
+                with download:
+                    excel_button(export_summary, "상품별_실적_비교.xlsx", "상품별 실적 비교", "download_search_summary", inline=True)
+                shown = pd.DataFrame({
+                    "상품명": summary["상품명"],
+                    "편성횟수": summary["편성횟수"].map(lambda x: f"{x:,}회"),
+                    "누적 매출액": summary["누적매출액"].map(lambda x: f"{format_eok(x)} ({format_won(x)})"),
+                    "최고 회차 매출": summary["최고회차매출"].map(lambda x: f"{format_eok(x)} ({format_won(x)})"),
+                    "최근 편성일": export_summary["최근편성일"],
+                    "최고매출일": summary["최고매출일"],
+                    "최고매출 홈쇼핑사": summary["최고매출 홈쇼핑사"],
+                })
+                st.dataframe(shown, use_container_width=True, hide_index=True, height=min(440, 40 + 36 * len(shown)))
+
+                st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
+                section_anchor("search-chart")
+                st.markdown('<div class="ranking-heading">② 상품별 매출 비교</div>', unsafe_allow_html=True)
+                chart_limit = min(len(summary), 15)
+                if len(summary) > chart_limit:
+                    st.caption(f"누적 매출액 상위 {chart_limit}개 상품을 표시합니다. 전체 결과는 위 표에서 확인할 수 있습니다.")
+                chart_data = summary.head(chart_limit).melt(id_vars="상품명", value_vars=["누적매출액", "최고회차매출"], var_name="매출구분", value_name="매출액")
+                chart_data["매출구분"] = chart_data["매출구분"].replace({"누적매출액":"누적 매출액", "최고회차매출":"최고 회차 매출"})
+                chart_data["매출액(억원)"] = chart_data["매출액"] / 100_000_000
+                fig = px.bar(chart_data, x="상품명", y="매출액(억원)", color="매출구분", barmode="group", color_discrete_map={"누적 매출액":"#3518C9", "최고 회차 매출":"#16A085"}, hover_data={"매출액":":,.0f", "매출액(억원)":":.2f"})
+                fig.update_layout(margin=dict(l=5, r=5, t=18, b=8), legend_title_text="", xaxis_title="", yaxis_title="매출액 (억원)", height=370)
+                st.plotly_chart(fig, use_container_width=True)
+
+                st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+                section_anchor("search-history")
+                heading, download = st.columns([16, 1], vertical_alignment="center")
+                with heading:
+                    st.markdown('<div class="ranking-heading">③ 상세 편성 이력</div>', unsafe_allow_html=True)
+                history = result.sort_values("_date_dt", ascending=False, na_position="last").copy()
+                history_table = pd.DataFrame({
+                    "판매날짜": history["_sales_period"],
+                    "운영주차": history["주차"] if "주차" in history else "-",
+                    "상품명": history["상품명"],
+                    "홈쇼핑사": history["홈쇼핑사"] if "홈쇼핑사" in history else "-",
+                    "매출액": history["총매출액"],
+                    "판매건수": history["판매건수"],
+                })
+                with download:
+                    excel_button(history_table, "상품별_상세_편성_이력.xlsx", "상세 편성 이력", "download_search_history", inline=True)
+                display_history = history_table.copy()
+                display_history["매출액"] = display_history["매출액"].map(lambda x: f"{format_eok(x)} ({format_won(x)})")
+                display_history["판매건수"] = display_history["판매건수"].map(format_count)
+                st.dataframe(display_history, use_container_width=True, hide_index=True, height=min(470, 40 + 36 * len(display_history)))
 
 elif st.session_state.menu == "홈쇼핑사별 분석":
     section_anchor("partner-summary")
